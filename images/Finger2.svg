@@ -1,0 +1,11 @@
+<svg
+    viewBox="0 0 300 300"
+    shapeRendering="geometricPrecision"
+    textRendering="geometricPrecision"
+    fill="black"
+  >
+    <path
+      d="M63.957269,183.232699q8.360427-43.195542,35.708224-38.68942q19.331256,4.551008,15.151042,47.049847t-11.147236,109.382257h-63.399906L63.957269,183.232699"
+      strokeWidth="0.6"
+    />
+  </svg>
