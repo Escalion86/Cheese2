@@ -1,5 +1,5 @@
 // import { StatusBar } from 'expo-status-bar'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import * as Font from 'expo-font'
 import * as SplashScreen from 'expo-splash-screen'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -14,6 +14,7 @@ import Photo from './Photo'
 import About from './About'
 import orientationAtom from './state/atoms/orientationAtom'
 import { DeviceMotion } from 'expo-sensors'
+import { useNotifications } from './hooks/useNotifications'
 
 import { LogBox } from 'react-native'
 LogBox.ignoreLogs(['new NativeEventEmitter'])
@@ -161,6 +162,28 @@ function AppWrapper() {
       storeSettings(newSettings)
     }
   }
+
+  // --- Expo Notifications ---
+  const handleNotificationTap = useCallback((response) => {
+    const { notification } = response
+    const data = notification?.request?.content?.data
+    console.log('Notification tapped:', data)
+    // Handle deep link or navigation based on notification data
+    if (data?.screen) {
+      setScreen(data.screen)
+    }
+  }, [])
+
+  const { pushToken, notification: initialNotification } = useNotifications({
+    onNotificationTap: handleNotificationTap,
+  })
+
+  // Log push token for debugging (remove in production)
+  useEffect(() => {
+    if (pushToken) {
+      console.log('Push token registered:', pushToken)
+    }
+  }, [pushToken])
 
   // const updateSetting = (key, value) => {
   //   if (key) setSettings({ ...settings, [key]: value })

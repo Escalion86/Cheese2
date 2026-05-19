@@ -14,7 +14,10 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "UIBackgroundModes": ["remote-notification"]
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -24,7 +27,9 @@
       "package": "cheese2.escalion.ru",
       "permissions": [
         "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO"
+        "android.permission.RECORD_AUDIO",
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.VIBRATE"
       ]
     },
     "web": {
@@ -62,6 +67,15 @@
         "expo-sensors",
         {
           "motionPermission": "Allow $(PRODUCT_NAME) to access your device motion."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/notification-icon.png",
+          "color": "#000000",
+          "sounds": [],
+          "mode": "production"
         }
       ]
     ],
