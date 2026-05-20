@@ -47,12 +47,30 @@ This document describes the GitHub secrets required for the Android Internal Tes
 Before the first upload, the following must be configured in Google Play Console:
 
 1. **App name**: Cheese2 (or change to desired name)
-2. **Privacy policy URL**: Required — host PRIVACY_POLICY.md and add URL to Play Console
+2. **Short description** (80 chars max)
+3. **Full description** (4000 chars max)
+4. **Privacy policy URL**: Required — host PRIVACY_POLICY.md and add URL to Play Console
    - Can be hosted on GitHub Pages: https://escalion86.github.io/cheese2/privacy-policy
    - Or any publicly accessible URL
-3. **App category**: Tools / Photography (depending on app purpose)
-4. **Target audience**: Must declare age rating via content rating questionnaire
-5. **Data safety section**: Declare what data is collected (camera, media library, device motion)
+5. **App category**: Tools / Photography (depending on app purpose)
+6. **Target audience**: Must declare age rating via content rating questionnaire
+7. **Data safety section**: Declare what data is collected (camera, media library, device motion)
+8. **App icon**: 512x512 PNG (already in assets/images/icon.png)
+9. **Feature graphic**: 1024x500 PNG/JPG for Play Store listing
+10. **Screenshots**: At least 2 screenshots for each supported device type
+
+## First Upload (Manual)
+
+The first AAB upload to Google Play MUST be done manually:
+1. Trigger the GitHub Actions workflow (push to main or manual dispatch)
+2. Download the AAB from the workflow artifacts
+3. Go to Google Play Console → Internal Testing
+4. Click "Create new release"
+5. Upload the AAB manually
+6. Fill in release notes
+7. Review and roll out to internal testers
+
+After the first manual upload, subsequent automated uploads will work.
 
 ## Workflow Triggers
 
@@ -64,3 +82,4 @@ The workflow runs automatically on every push to `main`. It can also be triggere
 - If Play Store upload fails, verify the service account has "Release Manager" permissions
 - Ensure the package name `cheese2.escalion.ru` matches in both app.json and Google Play Console
 - First upload must be done manually via Play Console before automated uploads work
+- If build times out, check EAS build queue status at https://expo.dev/troubleshooting/eas-build

@@ -29,6 +29,16 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Verify app configuration
+        run: |
+          echo "=== Checking app.json ==="
+          cat app.json | jq '.expo.name'
+          cat app.json | jq '.expo.android.package'
+          cat app.json | jq '.expo.version'
+          echo "=== Checking eas.json ==="
+          cat eas.json | jq '.build.internal'
+          cat eas.json | jq '.submit.internal'
+
       - name: Setup EAS
         uses: expo/expo-github-action@v8
         with:
@@ -38,15 +48,23 @@ jobs:
       - name: Build Android AAB (Internal profile)
         id: build
         run: |
+          echo "Starting EAS build..."
           eas build --platform android --profile internal --non-interactive --json 2>&1 | tee build_output.json
           echo "=== Build output ==="
           cat build_output.json
           BUILD_URL=$(cat build_output.json | jq -r '.artifacts.buildUrl // empty')
           BUILD_ID=$(cat build_output.json | jq -r '.id // empty')
+          STATUS=$(cat build_output.json | jq -r '.status // empty')
           echo "build_url=$BUILD_URL" >> $GITHUB_OUTPUT
           echo "build_id=$BUILD_ID" >> $GITHUB_OUTPUT
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
           echo "Build URL: $BUILD_URL"
           echo "Build ID: $BUILD_ID"
+          echo "Status: $STATUS"
+          if [ "$STATUS" != "finished" ]; then
+            echo "ERROR: Build did not finish successfully!"
+            exit 1
+          fi
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
@@ -56,6 +74,7 @@ jobs:
           mkdir -p build
           curl -L -o build/app.aab "${{ steps.build.outputs.build_url }}"
           ls -la build/
+          echo "AAB size: $(du -h build/app.aab | cut -f1)"
 
       - name: Upload AAB as artifact
         if: steps.build.outputs.build_url != ''
@@ -94,17 +113,35 @@ jobs:
           cat > whatsnew/whatsnew-en-US << 'EOF'
           Internal testing build v1.1.0
 
+          Features:
           - Camera photo capture and preview
-          - Media library integration
+          - Media library integration for saving photos
           - Push notification support
-          - Auto-rotate via device motion
+          - Auto-rotate via device motion sensors
           - Dark/Light theme toggle
           - Settings persistence
           - About screen
+
+          Testing focus: camera, notifications, theme switching, settings persistence
           EOF
-          cp whatsnew/whatsnew-en-US whatsnew/whatsnew-ru-RU
+          cat > whatsnew/whatsnew-ru-RU << 'EOF'
+          Внутренняя тестовая сборка v1.1.0
+
+          Функции:
+          - Фотосъёмка с камеры и предпросмотр
+          - Интеграция с медиабиблиотекой для сохранения фото
+          - Поддержка push-уведомлений
+          - Автоповорот через датчики движения
+          - Переключение тёмной/светлой темы
+          - Сохранение настроек
+          - Экран «О приложении»
+
+          Фокус тестирования: камера, уведомления, переключение темы, сохранение настроек
+          EOF
           echo "=== Release notes (EN) ==="
           cat whatsnew/whatsnew-en-US
+          echo "=== Release notes (RU) ==="
+          cat whatsnew/whatsnew-ru-RU
 
       - name: Upload to Google Play
         uses: r0adkll/upload-google-play@v1
