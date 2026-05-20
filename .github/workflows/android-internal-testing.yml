@@ -1,0 +1,84 @@
+name: Android Internal Testing
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      release_notes:
+        description: 'Release notes for this build'
+        required: false
+        default: 'Internal testing build'
+
+jobs:
+  build:
+    name: Build Android AAB via EAS
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Build Android AAB
+        id: build
+        run: |
+          eas build --platform android --profile production --non-interactive --json 2>&1 | tee build_output.json
+          BUILD_URL=$(cat build_output.json | jq -r '.artifacts.buildUrl // empty')
+          echo "build_url=$BUILD_URL" >> $GITHUB_OUTPUT
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Download AAB artifact
+        run: |
+          mkdir -p build
+          curl -L -o build/app.aab "${{ steps.build.outputs.build_url }}"
+          ls -la build/
+
+      - name: Upload AAB as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-aab
+          path: build/app.aab
+          retention-days: 7
+
+  upload-to-play-store:
+    name: Upload to Google Play Internal Testing
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Download AAB artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: android-aab
+          path: build/
+
+      - name: Upload to Google Play
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: cheese2.escalion.ru
+          releaseFiles: build/app.aab
+          track: internal
+          releaseNotes: |
+            - ${{ github.event.inputs.release_notes || 'Internal testing build' }}
+            - Commit: ${{ github.sha }}
+            - Branch: ${{ github.ref_name }}
+          status: completed
