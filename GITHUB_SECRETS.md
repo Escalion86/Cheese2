@@ -12,7 +12,7 @@ This document describes the GitHub secrets required for the Android Internal Tes
   3. Give it a name (e.g., "GitHub Actions EAS Build")
   4. Copy the token
 - **How to add to GitHub**:
-  1. Go to the cheese2 repository on GitHub
+  1. Go to the Cheese2 repository on GitHub
   2. Navigate to Settings → Secrets and variables → Actions
   3. Click "New repository secret"
   4. Name: `EXPO_TOKEN`
@@ -30,7 +30,7 @@ This document describes the GitHub secrets required for the Android Internal Tes
   7. Go back to Play Console → API access
   8. Grant "Release Manager" permissions to the service account
 - **How to add to GitHub**:
-  1. Go to the cheese2 repository on GitHub
+  1. Go to the Cheese2 repository on GitHub
   2. Navigate to Settings → Secrets and variables → Actions
   3. Click "New repository secret"
   4. Name: `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON`
@@ -60,7 +60,7 @@ The workflow runs automatically on every push to `main`. It can also be triggere
 
 ## Troubleshooting
 
-- If EAS build fails, check the build logs at https://expo.dev/accounts/escalion/projects/cheese2/builds
+- If EAS build fails, check the build logs at https://expo.dev/accounts/escalion/projects/Cheese2/builds
 - If Play Store upload fails, verify the service account has "Release Manager" permissions
 - Ensure the package name `cheese2.escalion.ru` matches in both app.json and Google Play Console
 - First upload must be done manually via Play Console before automated uploads work
