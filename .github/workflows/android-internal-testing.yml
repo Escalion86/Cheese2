@@ -14,7 +14,7 @@ jobs:
   build:
     name: Build Android AAB via EAS
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
 
     steps:
       - name: Checkout repository
@@ -35,35 +35,41 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
-      - name: Build Android AAB
+      - name: Build Android AAB (Internal profile)
         id: build
         run: |
-          eas build --platform android --profile production --non-interactive --json 2>&1 | tee build_output.json
+          eas build --platform android --profile internal --non-interactive --json 2>&1 | tee build_output.json
+          echo "=== Build output ==="
+          cat build_output.json
           BUILD_URL=$(cat build_output.json | jq -r '.artifacts.buildUrl // empty')
           BUILD_ID=$(cat build_output.json | jq -r '.id // empty')
           echo "build_url=$BUILD_URL" >> $GITHUB_OUTPUT
           echo "build_id=$BUILD_ID" >> $GITHUB_OUTPUT
+          echo "Build URL: $BUILD_URL"
+          echo "Build ID: $BUILD_ID"
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
       - name: Download AAB artifact
+        if: steps.build.outputs.build_url != ''
         run: |
           mkdir -p build
           curl -L -o build/app.aab "${{ steps.build.outputs.build_url }}"
           ls -la build/
 
       - name: Upload AAB as artifact
+        if: steps.build.outputs.build_url != ''
         uses: actions/upload-artifact@v4
         with:
           name: android-aab
           path: build/app.aab
-          retention-days: 7
+          retention-days: 14
 
   upload-to-play-store:
     name: Upload to Google Play Internal Testing
     needs: build
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
 
     steps:
       - name: Download AAB artifact
@@ -72,20 +78,32 @@ jobs:
           name: android-aab
           path: build/
 
+      - name: Verify AAB exists
+        run: |
+          ls -la build/
+          if [ ! -f build/app.aab ]; then
+            echo "ERROR: AAB file not found!"
+            exit 1
+          fi
+          echo "AAB size: $(du -h build/app.aab | cut -f1)"
+
       - name: Prepare release notes for Play Store
         id: release_notes
         run: |
           mkdir -p whatsnew
-          # Extract "What's New" section from RELEASE_NOTES.md for Play Store
-          echo "Internal testing build v1.1.0" > whatsnew/whatsnew-ru-RU
-          echo "" >> whatsnew/whatsnew-ru-RU
-          echo "- Camera photo capture and preview" >> whatsnew/whatsnew-ru-RU
-          echo "- Media library integration" >> whatsnew/whatsnew-ru-RU
-          echo "- Push notification support" >> whatsnew/whatsnew-ru-RU
-          echo "- Auto-rotate via device motion" >> whatsnew/whatsnew-ru-RU
-          echo "- Dark/Light theme toggle" >> whatsnew/whatsnew-ru-RU
-          echo "- Settings persistence" >> whatsnew/whatsnew-ru-RU
-          cp whatsnew/whatsnew-ru-RU whatsnew/whatsnew-en-US
+          cat > whatsnew/whatsnew-en-US << 'EOF'
+          Internal testing build v1.1.0
+
+          - Camera photo capture and preview
+          - Media library integration
+          - Push notification support
+          - Auto-rotate via device motion
+          - Dark/Light theme toggle
+          - Settings persistence
+          - About screen
+          EOF
+          cp whatsnew/whatsnew-en-US whatsnew/whatsnew-ru-RU
+          echo "=== Release notes (EN) ==="
           cat whatsnew/whatsnew-en-US
 
       - name: Upload to Google Play
