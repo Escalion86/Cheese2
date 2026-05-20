@@ -14,9 +14,23 @@
       "android": {
         "buildType": "app-bundle"
       }
+    },
+    "internal": {
+      "android": {
+        "buildType": "app-bundle",
+        "gradleCommand": ":app:bundleRelease"
+      },
+      "distribution": "internal"
     }
   },
   "submit": {
-    "production": {}
+    "production": {},
+    "internal": {
+      "android": {
+        "track": "internal",
+        "releaseStatus": "completed",
+        "rolloutPercentage": 100
+      }
+    }
   }
 }
