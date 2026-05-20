@@ -42,6 +42,18 @@ This document describes the GitHub secrets required for the Android Internal Tes
 - For error tracking integration
 - Can be added later when Sentry is configured
 
+## Play Store Listing Requirements
+
+Before the first upload, the following must be configured in Google Play Console:
+
+1. **App name**: Cheese2 (or change to desired name)
+2. **Privacy policy URL**: Required — host PRIVACY_POLICY.md and add URL to Play Console
+   - Can be hosted on GitHub Pages: https://escalion86.github.io/cheese2/privacy-policy
+   - Or any publicly accessible URL
+3. **App category**: Tools / Photography (depending on app purpose)
+4. **Target audience**: Must declare age rating via content rating questionnaire
+5. **Data safety section**: Declare what data is collected (camera, media library, device motion)
+
 ## Workflow Triggers
 
 The workflow runs automatically on every push to `main`. It can also be triggered manually from the Actions tab with custom release notes.
@@ -51,3 +63,4 @@ The workflow runs automatically on every push to `main`. It can also be triggere
 - If EAS build fails, check the build logs at https://expo.dev/accounts/escalion/projects/cheese2/builds
 - If Play Store upload fails, verify the service account has "Release Manager" permissions
 - Ensure the package name `cheese2.escalion.ru` matches in both app.json and Google Play Console
+- First upload must be done manually via Play Console before automated uploads work

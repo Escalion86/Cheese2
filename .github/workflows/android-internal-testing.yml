@@ -72,6 +72,22 @@ jobs:
           name: android-aab
           path: build/
 
+      - name: Prepare release notes for Play Store
+        id: release_notes
+        run: |
+          mkdir -p whatsnew
+          # Extract "What's New" section from RELEASE_NOTES.md for Play Store
+          echo "Internal testing build v1.1.0" > whatsnew/whatsnew-ru-RU
+          echo "" >> whatsnew/whatsnew-ru-RU
+          echo "- Camera photo capture and preview" >> whatsnew/whatsnew-ru-RU
+          echo "- Media library integration" >> whatsnew/whatsnew-ru-RU
+          echo "- Push notification support" >> whatsnew/whatsnew-ru-RU
+          echo "- Auto-rotate via device motion" >> whatsnew/whatsnew-ru-RU
+          echo "- Dark/Light theme toggle" >> whatsnew/whatsnew-ru-RU
+          echo "- Settings persistence" >> whatsnew/whatsnew-ru-RU
+          cp whatsnew/whatsnew-ru-RU whatsnew/whatsnew-en-US
+          cat whatsnew/whatsnew-en-US
+
       - name: Upload to Google Play
         uses: r0adkll/upload-google-play@v1
         with:
@@ -79,8 +95,6 @@ jobs:
           packageName: cheese2.escalion.ru
           releaseFiles: build/app.aab
           track: internal
-          releaseNotes: |
-            - ${{ github.event.inputs.release_notes || 'Internal testing build' }}
-            - Commit: ${{ github.sha }}
-            - Branch: ${{ github.ref_name }}
+          whatsNewDirectory: whatsnew/
           status: completed
+          inAppUpdatePriority: 5

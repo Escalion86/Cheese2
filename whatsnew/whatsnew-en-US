@@ -1,0 +1,8 @@
+Internal testing build v1.1.0
+
+- Camera photo capture and preview
+- Media library integration
+- Push notification support
+- Auto-rotate via device motion
+- Dark/Light theme toggle
+- Settings persistence
