@@ -49,20 +49,30 @@ jobs:
         id: build
         run: |
           echo "Starting EAS build..."
-          eas build --platform android --profile internal --non-interactive --json 2>&1 | tee build_output.json
-          echo "=== Build output ==="
-          cat build_output.json
-          BUILD_URL=$(cat build_output.json | jq -r '.artifacts.buildUrl // empty')
-          BUILD_ID=$(cat build_output.json | jq -r '.id // empty')
-          STATUS=$(cat build_output.json | jq -r '.status // empty')
+          # EAS CLI --json outputs NDJSON (one JSON object per line)
+          # We need to capture the final build result
+          BUILD_OUTPUT=$(eas build --platform android --profile internal --non-interactive --json 2>&1)
+          echo "$BUILD_OUTPUT"
+          
+          # Extract the last JSON line which contains the build result
+          BUILD_JSON=$(echo "$BUILD_OUTPUT" | grep -E '^\{' | tail -1)
+          echo "=== Build JSON ==="
+          echo "$BUILD_JSON"
+          
+          BUILD_URL=$(echo "$BUILD_JSON" | jq -r '.artifacts.buildUrl // empty')
+          BUILD_ID=$(echo "$BUILD_JSON" | jq -r '.id // empty')
+          STATUS=$(echo "$BUILD_JSON" | jq -r '.status // empty')
+          
           echo "build_url=$BUILD_URL" >> $GITHUB_OUTPUT
           echo "build_id=$BUILD_ID" >> $GITHUB_OUTPUT
           echo "status=$STATUS" >> $GITHUB_OUTPUT
+          
           echo "Build URL: $BUILD_URL"
           echo "Build ID: $BUILD_ID"
           echo "Status: $STATUS"
+          
           if [ "$STATUS" != "finished" ]; then
-            echo "ERROR: Build did not finish successfully!"
+            echo "ERROR: Build did not finish successfully! Status: $STATUS"
             exit 1
           fi
         env:
@@ -110,34 +120,47 @@ jobs:
         id: release_notes
         run: |
           mkdir -p whatsnew
-          cat > whatsnew/whatsnew-en-US << 'EOF'
-          Internal testing build v1.1.0
+          
+          # Use custom release notes if provided via workflow_dispatch
+          if [ -n "${{ github.event.inputs.release_notes }}" ]; then
+            CUSTOM_NOTES="${{ github.event.inputs.release_notes }}"
+            cat > whatsnew/whatsnew-en-US << EOF
+            $CUSTOM_NOTES
+            EOF
+            cat > whatsnew/whatsnew-ru-RU << EOF
+            $CUSTOM_NOTES
+            EOF
+          else
+            cat > whatsnew/whatsnew-en-US << 'EOF'
+            Internal testing build v1.1.0
 
-          Features:
-          - Camera photo capture and preview
-          - Media library integration for saving photos
-          - Push notification support
-          - Auto-rotate via device motion sensors
-          - Dark/Light theme toggle
-          - Settings persistence
-          - About screen
+            Features:
+            - Camera photo capture and preview
+            - Media library integration for saving photos
+            - Push notification support
+            - Auto-rotate via device motion sensors
+            - Dark/Light theme toggle
+            - Settings persistence
+            - About screen
 
-          Testing focus: camera, notifications, theme switching, settings persistence
-          EOF
-          cat > whatsnew/whatsnew-ru-RU << 'EOF'
-          Внутренняя тестовая сборка v1.1.0
+            Testing focus: camera, notifications, theme switching, settings persistence
+            EOF
+            cat > whatsnew/whatsnew-ru-RU << 'EOF'
+            Внутренняя тестовая сборка v1.1.0
 
-          Функции:
-          - Фотосъёмка с камеры и предпросмотр
-          - Интеграция с медиабиблиотекой для сохранения фото
-          - Поддержка push-уведомлений
-          - Автоповорот через датчики движения
-          - Переключение тёмной/светлой темы
-          - Сохранение настроек
-          - Экран «О приложении»
+            Функции:
+            - Фотосъёмка с камеры и предпросмотр
+            - Интеграция с медиабиблиотекой для сохранения фото
+            - Поддержка push-уведомлений
+            - Автоповорот через датчики движения
+            - Переключение тёмной/светлой темы
+            - Сохранение настроек
+            - Экран «О приложении»
 
-          Фокус тестирования: камера, уведомления, переключение темы, сохранение настроек
-          EOF
+            Фокус тестирования: камера, уведомления, переключение темы, сохранение настроек
+            EOF
+          fi
+          
           echo "=== Release notes (EN) ==="
           cat whatsnew/whatsnew-en-US
           echo "=== Release notes (RU) ==="
