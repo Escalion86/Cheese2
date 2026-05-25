@@ -55,6 +55,14 @@ jobs:
           else
             echo "EXPO_TOKEN: configured"
           fi
+          if [ -z "${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}" ]; then
+            echo "WARNING: GOOGLE_PLAY_SERVICE_ACCOUNT_JSON secret is not set!"
+            echo "Build will succeed but upload to Play Store will fail."
+            echo "Go to: https://github.com/Escalion86/Cheese2/settings/secrets/actions"
+            echo "Create at: Play Console → Settings → API access → Service account"
+          else
+            echo "GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: configured"
+          fi
           exit $MISSING
 
       - name: Install EAS CLI
