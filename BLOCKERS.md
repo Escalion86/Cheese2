@@ -3,7 +3,7 @@
 **Date:** 2026-05-26
 **Task:** t_12199359
 **Status:** BLOCKED — requires manual credential setup by Escalion
-**Attempts:** 13+
+**Attempts:** 15+
 
 ## Blockers
 
@@ -22,14 +22,13 @@
 ### 3. Cannot Build Locally on Orange Pi
 - Orange Pi is ARM64 Linux — no Android SDK/Gradle
 - EAS CLI `npm install -g eas-cli` times out (slow registry on ARM64)
-- Docker available but insufficient RAM (3.2GB available, need 8GB+ for Gradle)
+- Docker available but insufficient RAM (4.0GB available, need 8GB+ for Gradle)
 - Disk space OK (201GB free) but RAM is the bottleneck
 - **Workaround:** Use GitHub Actions workflow (cloud build) once secrets are set
 
 ### 4. GitHub `gh` CLI Not Authenticated
 - Cannot trigger GitHub Actions workflow or check secret status via CLI
-- GH_TOKEN env var exists but is invalid/expired (API returns "Bad credentials")
-- **Action needed:** Either set secrets manually via GitHub UI, or provide a valid PAT
+- **Action needed:** Run `gh auth login` or set `GH_TOKEN` env var with a valid PAT
 
 ## What's Ready
 
@@ -43,7 +42,7 @@
 - ✅ Feature graphic (1024x500) — verified
 - ✅ App icon (1024x1024), adaptive icon, splash screen, notification icon — all verified
 - ✅ All M1-T8 features implemented
-- ✅ Code pushed to GitHub (branch: main, commit: 190566e)
+- ✅ Code pushed to GitHub (branch: main, commit: 18316d6)
 - ✅ SSH git access works (can push commits)
 - ✅ AndroidManifest.xml with all required permissions
 - ✅ build.gradle with targetSdk 34, minSdk 21
@@ -102,6 +101,6 @@ Everything is 100% ready on the code side. Only manual steps remain.
 - **Machine:** Orange Pi 3B (ARM64 Linux)
 - **Hostname:** orangepi
 - **OS:** Linux 6.6.0-rc5-rockchip-rk356x
-- **RAM:** 7.5GB total, 3.2GB available (insufficient for Android build)
+- **RAM:** 7.5GB total, 4.0GB available (insufficient for Android build)
 - **Disk:** 226GB total, 201GB free
 - **Limitations:** No Android SDK, no Gradle, slow npm registry, no GitHub credentials, no Docker permissions for orangepi user
