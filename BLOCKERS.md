@@ -3,33 +3,32 @@
 **Date:** 2026-05-26
 **Task:** t_12199359
 **Status:** BLOCKED — requires manual credential setup by Escalion
-**Attempts:** 11+
+**Attempts:** 12+
 
 ## Blockers
 
-### 1. No EXPO_TOKEN (CRITICAL)
+### 1. No EXPO_TOKEN in GitHub Secrets (CRITICAL)
 - EAS Build requires an Expo access token to authenticate
-- No token found in environment variables, config files, or GitHub secrets
-- `gh` CLI is not authenticated (GH_TOKEN and GITHUB_TOKEN env vars are empty)
-- SSH git access works (git@github.com:Escalion86/Cheese2.git) but cannot set secrets via SSH
+- `gh` CLI not authenticated — cannot check/set secrets via CLI
+- Workflow run #26411868004 failed at "Validate required secrets" step (attempt 11)
 - **Action needed:** Create token at https://expo.dev/settings/access-tokens
 - **Then:** Add as `EXPO_TOKEN` to GitHub Secrets at https://github.com/Escalion86/Cheese2/settings/secrets/actions
 
-### 2. No GOOGLE_PLAY_SERVICE_ACCOUNT_JSON (CRITICAL)
+### 2. No GOOGLE_PLAY_SERVICE_ACCOUNT_JSON in GitHub Secrets (CRITICAL)
 - Google Play upload requires a service account JSON key
-- No key found in environment variables or config files
+- No key found anywhere on the server
 - **Action needed:** Create service account at Google Play Console → Settings → API access
 - **Then:** Add as `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` to GitHub Secrets
 
 ### 3. Cannot Build Locally on Orange Pi
 - Orange Pi is ARM64 Linux — no Android SDK/Gradle
-- EAS CLI npm install times out (slow registry on ARM64)
+- EAS CLI `npm install -g eas-cli` times out (slow registry on ARM64)
+- Docker available but orangepi user has no permissions to Docker socket
 - **Workaround:** Use GitHub Actions workflow (cloud build) once secrets are set
 
 ### 4. GitHub `gh` CLI Not Authenticated
-- GH_TOKEN and GITHUB_TOKEN environment variables are empty
 - Cannot trigger GitHub Actions workflow or check secret status via CLI
-- **Action needed:** Run `gh auth login` or set `GITHUB_TOKEN` env var with a PAT
+- **Action needed:** Either set secrets manually via GitHub UI, or run `gh auth login` with a PAT
 
 ## What's Ready
 
@@ -101,4 +100,4 @@ Everything is 100% ready on the code side. Only manual steps remain:
 - **Machine:** Orange Pi 3B (ARM64 Linux)
 - **Hostname:** orangepi
 - **OS:** Linux 6.6.0-rc5-rockchip-rk356x
-- **Limitations:** No Android SDK, no Gradle, slow npm registry, no GitHub credentials
+- **Limitations:** No Android SDK, no Gradle, slow npm registry, no GitHub credentials, no Docker permissions
