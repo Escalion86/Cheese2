@@ -3,7 +3,16 @@
 **Date:** 2026-05-26
 **Task:** t_12199359
 **Status:** BLOCKED — requires manual credential setup by Escalion
-**Attempts:** 23+
+**Attempts:** 24+
+
+## Latest Check (2026-05-26 04:00)
+
+- Windows PC (192.168.1.125) unreachable via SSH (no route to host)
+- gh CLI not authenticated (no GH_TOKEN, no browser auth possible on headless server)
+- EAS CLI not installed, npm install times out on this network
+- Privacy policy URL verified: https://raw.githubusercontent.com/Escalion86/Cheese2/main/PRIVACY_POLICY.md → HTTP 200 ✅
+- Git push works (SSH key configured) ✅
+- Repo at commit ce5369b, branch main, clean working tree ✅
 
 ## Summary
 
