@@ -3,26 +3,26 @@
 **Date:** 2026-05-26
 **Task:** t_12199359
 **Status:** BLOCKED — requires manual credential setup by Escalion
-**Attempts:** 30
+**Attempts:** 31
 
-## Latest Check (2026-05-26 17:xx)
+## Latest Check (2026-05-26)
 
-- Windows PC (192.168.1.125) unreachable via SSH (100% packet loss)
-- gh CLI not authenticated (no GH_TOKEN, no browser auth possible on headless server)
-- EAS CLI not installed (npm install times out / npx hangs)
-- Expo.dev reachable (GitHub API returns 200) — but no token to use it
+- gh CLI installed but NOT authenticated (no GH_TOKEN, no browser auth on headless server)
+- EAS CLI not installed (npm install times out on this network)
+- Expo.dev reachable but no token to authenticate
 - Privacy policy URL verified working
 - Git push works (SSH key configured)
-- Repo at commit 7351837, branch main, clean working tree
+- Repo at commit fc4ec2c, branch main, clean working tree
 - GitHub Actions workflow exists and is active
 - All assets present (icon, adaptive icon, splash, notification icon, feature graphic)
 - All M1-T8 features implemented and pushed
+- node v22.22.2, npm 10.9.7 — available but cannot install eas-cli
 
 ## Summary
 
 Everything on the code/CI side is 100% ready. The ONLY blockers are manual steps
 that Escalion must do via web browsers. No further code changes are needed.
-This task has been attempted 30 times — the blockers remain identical.
+This task has been attempted 31 times — the blockers remain identical.
 
 ## What ONLY Escalion Can Do
 
@@ -42,7 +42,7 @@ This task has been attempted 30 times — the blockers remain identical.
 - Upload icon (512x512), feature graphic (1024x500), screenshots (min 2)
 - Create service account at Settings → API access → "Release Manager" role
 - Create Internal Testing track, add tester emails
-- Set privacy policy URL: https://raw.githubusercontent.com/Escalion86/Cheese2/main/PRIVACY_POLICY.md
+- Set privacy policy URL
 
 ### 4. Trigger Build (2 min)
 - Push to `main` or use "Run workflow" on GitHub Actions tab
@@ -63,7 +63,7 @@ This task has been attempted 30 times — the blockers remain identical.
 - All M1-T8 features implemented and pushed to GitHub
 - AndroidManifest.xml, build.gradle (targetSdk 34, minSdk 21)
 - App icon (512x512), adaptive icon, splash, notification icon
-- GitHub repo: https://github.com/Escalion86/Cheese2 (branch: main, commit: 7351837)
+- GitHub repo: https://github.com/Escalion86/Cheese2 (branch: main, commit: fc4ec2c)
 - Privacy policy publicly accessible via raw.githubusercontent.com
 - GitHub Actions workflow active
 
@@ -77,7 +77,6 @@ This task has been attempted 30 times — the blockers remain identical.
 - First AAB upload MUST be manual (Google Play policy)
 - Cannot set GitHub Secrets programmatically (requires web UI auth)
 - npm install eas-cli times out on this network (too slow)
-- Windows PC (main dev machine) unreachable via SSH
 
 ## Worker Environment
 - Orange Pi 3B, ARM64 Linux, 7.5GB RAM (~4-5GB free), 201GB disk free
