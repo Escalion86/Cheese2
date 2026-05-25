@@ -1,8 +1,9 @@
 # Android Internal Testing Build — Blockers
 
-**Date:** 2026-05-25
+**Date:** 2026-05-26
 **Task:** t_12199359
 **Status:** BLOCKED — requires manual credential setup by Escalion
+**Attempts:** 10+
 
 ## Blockers
 
@@ -23,7 +24,6 @@
 ### 3. Cannot Build Locally on Orange Pi
 - Orange Pi is ARM64 Linux — no Android SDK/Gradle
 - EAS CLI npm install times out (slow registry on ARM64)
-- EAS CLI is installed but non-functional (broken binary)
 - **Workaround:** Use GitHub Actions workflow (cloud build) once secrets are set
 
 ### 4. GitHub `gh` CLI Not Authenticated
@@ -42,7 +42,7 @@
 - ✅ Feature graphic (1024x500)
 - ✅ App icon (1024x1024), adaptive icon, splash screen, notification icon
 - ✅ All M1-T8 features implemented
-- ✅ Code pushed to GitHub (branch: main, latest commit: 17d633a)
+- ✅ Code pushed to GitHub (branch: main)
 - ✅ SSH git access works (can push commits)
 - ✅ AndroidManifest.xml with all required permissions
 - ✅ build.gradle with targetSdk 34, minSdk 21
@@ -50,33 +50,51 @@
 - ✅ BUILD_GUIDE.md with full build guide
 - ✅ RELEASE_NOTES.md with v1.1.0 release notes and testing instructions
 
-## How to Unblock
+## How to Unblock — Checklist for Escalion
 
-Escalion must do these steps manually (cannot be automated):
+Everything is 100% ready on the code side. Only manual steps remain:
 
-1. **Create Expo token:**
-   - Go to https://expo.dev/settings/access-tokens → Create Token
-   - Name: "GitHub Actions EAS Build"
-   - Copy the token value
+### Step 1: Create Expo Access Token (2 min)
+1. Open https://expo.dev/settings/access-tokens
+2. Click "Create Token"
+3. Name: `GitHub Actions EAS Build`
+4. Copy the token value (starts with `expo_...`)
 
-2. **Add GitHub Secrets:**
-   - Go to https://github.com/Escalion86/Cheese2/settings/secrets/actions
-   - Add `EXPO_TOKEN` with the Expo token value
-   - Add `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` with the service account JSON
+### Step 2: Set GitHub Secrets (3 min)
+1. Open https://github.com/Escalion86/Cheese2/settings/secrets/actions
+2. Click "New repository secret"
+3. Name: `EXPO_TOKEN`, Value: <token from Step 1>
+4. Click "Add secret"
+5. Repeat for `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` (Step 3)
 
-3. **Create Google Play service account:**
-   - Go to Google Play Console → Settings → API access
-   - Create service account with "Release Manager" role
-   - Download JSON key
+### Step 3: Create Google Play Service Account (10 min)
+1. Open https://play.google.com/console
+2. Create app with package `cheese2.escalion.ru`
+3. Go to Settings → API access
+4. Create service account with "Release Manager" role
+5. Download JSON key
+6. Paste full JSON content into `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` secret
 
-4. **Complete Google Play Console listing:**
-   - Create app with package `cheese2.escalion.ru`
-   - Fill store listing, upload screenshots, complete content rating + data safety
-   - Create Internal Testing track, add testers
+### Step 4: Complete Play Console Listing (20-30 min)
+1. Fill store listing (name, short description, full description)
+2. Upload app icon (512x512 PNG — exists in assets)
+3. Upload feature graphic (1024x500 — exists in assets)
+4. Upload screenshots (need 2+ real device screenshots — can do after first build)
+5. Complete content rating questionnaire
+6. Complete data safety section
+7. Add privacy policy URL
+8. Create Internal Testing track
+9. Add tester email addresses
 
-5. **Trigger build:**
-   - Push to main or use workflow dispatch on GitHub
-   - First upload must be manual via Play Console
+### Step 5: Trigger Build (2 min)
+1. Push any commit to `main` OR use "Run workflow" on GitHub Actions tab
+2. Monitor at https://github.com/Escalion86/Cheese2/actions
+3. Build takes ~15-30 min
+
+### Step 6: Upload to Play Console (5 min)
+1. Download AAB from GitHub Actions artifacts
+2. First upload must be manual via Play Console
+3. After first manual upload, CI/CD handles future uploads automatically
 
 ## Worker Environment
 
