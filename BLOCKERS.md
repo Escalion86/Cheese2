@@ -42,8 +42,10 @@
 - ✅ Feature graphic (1024x500)
 - ✅ App icon, adaptive icon, splash screen, notification icon
 - ✅ All M1-T8 features implemented
-- ✅ Code pushed to GitHub (branch: main, latest commit: f8e52b7)
+- ✅ Code pushed to GitHub (branch: main, latest commit: 0c79fd5)
 - ✅ SSH git access works (can push commits)
+- ✅ AndroidManifest.xml with all required permissions
+- ✅ build.gradle with targetSdk 34, minSdk 21
 
 ## How to Unblock
 
