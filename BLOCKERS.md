@@ -106,3 +106,24 @@ Everything is 100% ready on the code side. Only manual steps remain.
 - **Disk:** 226GB total, 201GB free
 - **Network:** slow npm registry on ARM64 (eas-cli install times out at 60s+)
 - **Limitations:** No Android SDK, no Gradle, no GitHub credentials, no Docker permissions for orangepi user
+
+---
+
+## Attempt 17 (2026-05-26)
+
+### Status: SAME BLOCKERS
+- `gh` CLI still not authenticated (no GH_TOKEN, no `gh auth login`)
+- Cannot check/set GitHub secrets via CLI
+- Cannot trigger GitHub Actions workflow via CLI
+- EAS CLI installed but binary not linked globally (`npm list -g eas-cli` shows installed but `eas` command not found in PATH)
+- Workflow confirmed active via GitHub API: ID 280004951, state=active
+- Repo API accessible without auth: workflow file exists
+- No change in available RAM (5.4GB free) — still insufficient for local Android build
+
+### New Finding
+- EAS CLI package installed at `/home/orangepi/.hermes/node/lib/node_modules/eas-cli/` but bin not symlinked
+- Could potentially fix with `npm link eas-cli` or direct `npx eas-cli` invocation
+- BUT: still needs EXPO_TOKEN to actually build
+
+### Conclusion
+All blockers remain manual credential setup tasks. No code-side changes needed.
