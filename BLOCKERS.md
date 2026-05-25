@@ -37,12 +37,12 @@
 - ✅ app.json with package `cheese2.escalion.ru`, version 1.1.0, versionCode 2
 - ✅ eas.json with `internal` profile (AAB build, internal distribution)
 - ✅ GitHub Actions workflow (`.github/workflows/android-internal-testing.yml`)
-- ✅ Release notes (English + Russian) in workflow
+- ✅ Release notes (English + Russian) in workflow + whatsnew/ directory
 - ✅ Privacy policy (`PRIVACY_POLICY.md`)
 - ✅ Feature graphic (1024x500)
-- ✅ App icon, adaptive icon, splash screen, notification icon
+- ✅ App icon (1024x1024), adaptive icon, splash screen, notification icon
 - ✅ All M1-T8 features implemented
-- ✅ Code pushed to GitHub (branch: main, latest commit: 90e129c)
+- ✅ Code pushed to GitHub (branch: main, latest commit: 17d633a)
 - ✅ SSH git access works (can push commits)
 - ✅ AndroidManifest.xml with all required permissions
 - ✅ build.gradle with targetSdk 34, minSdk 21
