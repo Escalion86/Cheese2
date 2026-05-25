@@ -31,12 +31,16 @@ jobs:
 
       - name: Verify app configuration
         run: |
-          echo "=== Checking app.json ==="
-          cat app.json | jq '.expo.name'
-          cat app.json | jq '.expo.android.package'
-          cat app.json | jq '.expo.version'
-          echo "=== Checking eas.json ==="
+          echo "=== App Config ==="
+          echo "Name: $(cat app.json | jq -r '.expo.name')"
+          echo "Package: $(cat app.json | jq -r '.expo.android.package')"
+          echo "Version: $(cat app.json | jq -r '.expo.version')"
+          echo "VersionCode: $(cat app.json | jq -r '.expo.android.versionCode')"
+          echo ""
+          echo "=== EAS Internal Profile ==="
           cat eas.json | jq '.build.internal'
+          echo ""
+          echo "=== EAS Submit Internal ==="
           cat eas.json | jq '.submit.internal'
 
       - name: Setup EAS
@@ -48,51 +52,104 @@ jobs:
       - name: Build Android AAB (Internal profile)
         id: build
         run: |
-          echo "Starting EAS build..."
-          # EAS CLI --json outputs NDJSON (one JSON object per line)
-          # We need to capture the final build result
-          BUILD_OUTPUT=$(eas build --platform android --profile internal --non-interactive --json 2>&1)
+          echo "::group::EAS Build Output"
+          
+          BUILD_EXIT_CODE=0
+          BUILD_OUTPUT=$(eas build --platform android --profile internal --non-interactive 2>&1) || BUILD_EXIT_CODE=$?
+          
           echo "$BUILD_OUTPUT"
+          echo "::endgroup::"
           
-          # Extract the last JSON line which contains the build result
-          BUILD_JSON=$(echo "$BUILD_OUTPUT" | grep -E '^\{' | tail -1)
-          echo "=== Build JSON ==="
-          echo "$BUILD_JSON"
+          # Parse the build ID from output
+          BUILD_ID=$(echo "$BUILD_OUTPUT" | grep -oP 'Build ID:\s*\K[a-zA-Z0-9-]+' | head -1)
           
-          BUILD_URL=$(echo "$BUILD_JSON" | jq -r '.artifacts.buildUrl // empty')
-          BUILD_ID=$(echo "$BUILD_JSON" | jq -r '.id // empty')
-          STATUS=$(echo "$BUILD_JSON" | jq -r '.status // empty')
+          if [ -z "$BUILD_ID" ]; then
+            BUILD_ID=$(echo "$BUILD_OUTPUT" | grep -oP '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -1)
+          fi
           
-          echo "build_url=$BUILD_URL" >> $GITHUB_OUTPUT
-          echo "build_id=$BUILD_ID" >> $GITHUB_OUTPUT
-          echo "status=$STATUS" >> $GITHUB_OUTPUT
+          echo "build_id=$BUILD_ID" >> "$GITHUB_OUTPUT"
           
-          echo "Build URL: $BUILD_URL"
+          # Extract build URL
+          BUILD_URL=$(echo "$BUILD_OUTPUT" | grep -oP 'https://expo\.dev/accounts/[^/]+/projects/[^/]+/builds/[a-zA-Z0-9-]+' | head -1)
+          echo "build_url=$BUILD_URL" >> "$GITHUB_OUTPUT"
+          
+          echo ""
+          echo "=== Build Summary ==="
           echo "Build ID: $BUILD_ID"
-          echo "Status: $STATUS"
+          echo "Build URL: $BUILD_URL"
+          echo "Exit Code: $BUILD_EXIT_CODE"
           
-          if [ "$STATUS" != "finished" ]; then
-            echo "ERROR: Build did not finish successfully! Status: $STATUS"
+          if echo "$BUILD_OUTPUT" | grep -qi "Build.*finished\|Build.*completed\|Build.*succeeded\|buildUrl"; then
+            echo "status=finished" >> "$GITHUB_OUTPUT"
+            echo "Status: FINISHED"
+          elif [ $BUILD_EXIT_CODE -ne 0 ]; then
+            echo "status=failed" >> "$GITHUB_OUTPUT"
+            echo "ERROR: Build failed with exit code $BUILD_EXIT_CODE"
             exit 1
+          else
+            echo "status=unknown" >> "$GITHUB_OUTPUT"
+            echo "Warning: Could not determine build status from output"
           fi
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
+      - name: Upload build logs as artifact (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs
+          path: |
+            ${{ github.workspace }}/*.log
+          retention-days: 7
+
       - name: Download AAB artifact
-        if: steps.build.outputs.build_url != ''
+        if: steps.build.outputs.build_id != ''
         run: |
           mkdir -p build
-          curl -L -o build/app.aab "${{ steps.build.outputs.build_url }}"
+          
+          echo "Fetching build info from EAS API..."
+          BUILD_INFO=$(curl -s -H "Authorization: Bearer ${{ secrets.EXPO_TOKEN }}" \
+            "https://api.expo.dev/v2/projects/7676a13a-3d4a-4da0-ad23-5b4df7b3bb38/builds/${{ steps.build.outputs.build_id }}")
+          
+          AAB_URL=$(echo "$BUILD_INFO" | jq -r '.artifacts.buildUrl // empty')
+          
+          if [ -n "$AAB_URL" ] && [ "$AAB_URL" != "null" ]; then
+            echo "Downloading AAB from: $AAB_URL"
+            curl -L -o build/app.aab "$AAB_URL"
+          else
+            echo "Could not get AAB URL from API. Build info:"
+            echo "$BUILD_INFO" | jq '.artifacts // "No artifacts"'
+            exit 1
+          fi
+          
+          echo ""
+          echo "=== AAB File ==="
           ls -la build/
           echo "AAB size: $(du -h build/app.aab | cut -f1)"
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
       - name: Upload AAB as artifact
-        if: steps.build.outputs.build_url != ''
+        if: steps.build.outputs.build_id != ''
         uses: actions/upload-artifact@v4
         with:
           name: android-aab
           path: build/app.aab
           retention-days: 14
+
+      - name: Verify AAB artifact exists
+        run: |
+          if [ ! -f build/app.aab ]; then
+            echo "ERROR: AAB file not found!"
+            exit 1
+          fi
+          AAB_SIZE=$(du -csm build/app.aab | tail -1 | cut -f1)
+          echo "AAB size: ${AAB_SIZE}MB"
+          if [ "$AAB_SIZE" -lt 1 ]; then
+            echo "ERROR: AAB file seems too small (${AAB_SIZE}MB)"
+            exit 1
+          fi
+          echo "AAB verification passed"
 
   upload-to-play-store:
     name: Upload to Google Play Internal Testing
@@ -120,49 +177,49 @@ jobs:
         id: release_notes
         run: |
           mkdir -p whatsnew
-          
-          # Use custom release notes if provided via workflow_dispatch
-          if [ -n "${{ github.event.inputs.release_notes }}" ]; then
-            CUSTOM_NOTES="${{ github.event.inputs.release_notes }}"
-            cat > whatsnew/whatsnew-en-US << EOF
-            $CUSTOM_NOTES
-            EOF
-            cat > whatsnew/whatsnew-ru-RU << EOF
-            $CUSTOM_NOTES
-            EOF
+
+          CUSTOM_NOTES="${{ github.event.inputs.release_notes }}"
+
+          if [ -n "$CUSTOM_NOTES" ] && [ "$CUSTOM_NOTES" != "Internal testing build" ]; then
+            printf '%s' "$CUSTOM_NOTES" > whatsnew/whatsnew-en-US
+            printf '%s' "$CUSTOM_NOTES" > whatsnew/whatsnew-ru-RU
           else
-            cat > whatsnew/whatsnew-en-US << 'EOF'
-            Internal testing build v1.1.0
+            python3 -c "
+          import pathlib
+          pathlib.Path('whatsnew/whatsnew-en-US').write_text('''Internal testing build v1.1.0
 
-            Features:
-            - Camera photo capture and preview
-            - Media library integration for saving photos
-            - Push notification support
-            - Auto-rotate via device motion sensors
-            - Dark/Light theme toggle
-            - Settings persistence
-            - About screen
+          Features:
+          - Photo enhancement with playing card overlay
+          - Camera photo capture and preview
+          - Media library integration for saving photos
+          - Push notification support
+          - Auto-rotate via device motion sensors
+          - Dark/Light theme toggle
+          - Settings persistence
+          - About screen with developer info
 
-            Testing focus: camera, notifications, theme switching, settings persistence
-            EOF
-            cat > whatsnew/whatsnew-ru-RU << 'EOF'
-            Внутренняя тестовая сборка v1.1.0
+          Testing focus: camera, card overlay, notifications, theme switching, settings persistence
+          ''')
+          pathlib.Path('whatsnew/whatsnew-ru-RU').write_text('''Внутренняя тестовая сборка v1.1.0
 
-            Функции:
-            - Фотосъёмка с камеры и предпросмотр
-            - Интеграция с медиабиблиотекой для сохранения фото
-            - Поддержка push-уведомлений
-            - Автоповорот через датчики движения
-            - Переключение тёмной/светлой темы
-            - Сохранение настроек
-            - Экран «О приложении»
+          Функции:
+          - Обработка фото с наложением игральной карты
+          - Фотосъёмка с камеры и предпросмотр
+          - Интеграция с медиабиблиотекой для сохранения фото
+          - Поддержка push-уведомлений
+          - Автоповорот через датчики движения
+          - Переключение тёмной/светлой темы
+          - Сохранение настроек
+          - Экран «О приложении» с информацией о разработчике
 
-            Фокус тестирования: камера, уведомления, переключение темы, сохранение настроек
-            EOF
+          Фокус тестирования: камера, наложение карты, уведомления, переключение темы, сохранение настроек
+          ''')
+          "
           fi
-          
+
           echo "=== Release notes (EN) ==="
           cat whatsnew/whatsnew-en-US
+          echo ""
           echo "=== Release notes (RU) ==="
           cat whatsnew/whatsnew-ru-RU
 
