@@ -3,7 +3,7 @@
 **Date:** 2026-05-26
 **Task:** t_12199359
 **Status:** BLOCKED — requires manual credential setup by Escalion
-**Attempts:** 15+
+**Attempts:** 16+
 
 ## Blockers
 
@@ -21,13 +21,15 @@
 
 ### 3. Cannot Build Locally on Orange Pi
 - Orange Pi is ARM64 Linux — no Android SDK/Gradle
-- EAS CLI `npm install -g eas-cli` times out (slow registry on ARM64)
+- EAS CLI `npx eas-cli` times out (slow npm registry on ARM64 — 60s+ just to install)
 - Docker available but insufficient RAM (4.0GB available, need 8GB+ for Gradle)
 - Disk space OK (201GB free) but RAM is the bottleneck
 - **Workaround:** Use GitHub Actions workflow (cloud build) once secrets are set
 
 ### 4. GitHub `gh` CLI Not Authenticated
 - Cannot trigger GitHub Actions workflow or check secret status via CLI
+- No `GH_TOKEN` or `GITHUB_TOKEN` env vars set
+- No `~/.config/gh/hosts.yml` configured
 - **Action needed:** Run `gh auth login` or set `GH_TOKEN` env var with a valid PAT
 
 ## What's Ready
@@ -37,12 +39,11 @@
 - ✅ eas.json with `internal` profile (AAB build, internal distribution)
 - ✅ GitHub Actions workflow (`.github/workflows/android-internal-testing.yml`)
 - ✅ Release notes (English + Russian) in workflow + whatsnew/ directory
-- ✅ Privacy policy (`PRIVACY_POLICY.md`) — publicly accessible at:
-  `https://raw.githubusercontent.com/Escalion86/Cheese2/main/PRIVACY_POLICY.md`
-- ✅ Feature graphic (1024x500) — verified
-- ✅ App icon (1024x1024), adaptive icon, splash screen, notification icon — all verified
+- ✅ Privacy policy (`PRIVACY_POLICY.md`) — publicly accessible
+- ✅ Feature graphic (1024x500)
+- ✅ App icon, adaptive icon, splash screen, notification icon
 - ✅ All M1-T8 features implemented
-- ✅ Code pushed to GitHub (branch: main, commit: 18316d6)
+- ✅ Code pushed to GitHub (branch: main, commit: 179f4f9)
 - ✅ SSH git access works (can push commits)
 - ✅ AndroidManifest.xml with all required permissions
 - ✅ build.gradle with targetSdk 34, minSdk 21
@@ -77,9 +78,9 @@ Everything is 100% ready on the code side. Only manual steps remain.
 
 ### Step 4: Complete Play Console Listing (20-30 min)
 1. Fill store listing (name, short description, full description)
-2. Upload app icon (512x512 PNG — exists in assets)
-3. Upload feature graphic (1024x500 — exists in assets)
-4. Upload screenshots (need 2+ real device screenshots — can do after first build)
+2. Upload app icon (512x512 PNG)
+3. Upload feature graphic (1024x500)
+4. Upload screenshots (2+ real device screenshots)
 5. Complete content rating questionnaire
 6. Complete data safety section
 7. Add privacy policy URL: `https://raw.githubusercontent.com/Escalion86/Cheese2/main/PRIVACY_POLICY.md`
@@ -94,7 +95,7 @@ Everything is 100% ready on the code side. Only manual steps remain.
 ### Step 6: Upload to Play Console (5 min for first release)
 1. Download AAB from GitHub Actions artifacts
 2. First upload must be manual via Play Console
-3. After first manual upload, CI/CD handles future uploads automatically
+3. After first manual upload, CI/CD handles future uploads
 
 ## Worker Environment
 
@@ -103,4 +104,5 @@ Everything is 100% ready on the code side. Only manual steps remain.
 - **OS:** Linux 6.6.0-rc5-rockchip-rk356x
 - **RAM:** 7.5GB total, 4.0GB available (insufficient for Android build)
 - **Disk:** 226GB total, 201GB free
-- **Limitations:** No Android SDK, no Gradle, slow npm registry, no GitHub credentials, no Docker permissions for orangepi user
+- **Network:** slow npm registry on ARM64 (eas-cli install times out at 60s+)
+- **Limitations:** No Android SDK, no Gradle, no GitHub credentials, no Docker permissions for orangepi user
