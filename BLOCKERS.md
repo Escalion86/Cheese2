@@ -3,26 +3,27 @@
 **Date:** 2026-05-26
 **Task:** t_12199359
 **Status:** BLOCKED — requires manual credential setup by Escalion
-**Attempts:** 28+
+**Attempts:** 29
 
-## Latest Check (2026-05-26 07:00)
+## Latest Check (2026-05-26 15:38)
 
 - Windows PC (192.168.1.125) unreachable via SSH (no route to host, 100% packet loss)
 - gh CLI not authenticated (no GH_TOKEN, no browser auth possible on headless server)
-- EAS CLI not installed, npm install times out on this network (too slow)
-- Expo.dev unreachable from this network
-- GitHub API reachable but no credentials to use it
-- Privacy policy URL verified: https://raw.githubusercontent.com/Escalion86/Cheese2/main/PRIVACY_POLICY.md → HTTP 200 ✅
-- Git push works (SSH key configured) ✅
-- Repo at commit cbd509a, branch main, clean working tree ✅
-- GitHub Actions workflow exists and is active (ID: 280004951) ✅
-- All assets present (icon, adaptive icon, splash, notification icon, feature graphic) ✅
-- All M1-T8 features implemented and pushed ✅
+- EAS CLI install timed out (npm too slow on this network)
+- Expo.dev IS reachable (8.47.69.0, 433ms) — but no token to use it
+- GitHub API reachable but no credentials
+- Privacy policy URL verified: https://raw.githubusercontent.com/Escalion86/Cheese2/main/PRIVACY_POLICY.md → HTTP 200
+- Git push works (SSH key configured)
+- Repo at commit c2421c7, branch main, clean working tree
+- GitHub Actions workflow exists and is active
+- All assets present (icon, adaptive icon, splash, notification icon, feature graphic)
+- All M1-T8 features implemented and pushed
 
 ## Summary
 
 Everything on the code/CI side is 100% ready. The ONLY blockers are manual steps
 that Escalion must do via web browsers. No further code changes are needed.
+This task has been attempted 29 times — the blockers remain identical.
 
 ## What ONLY Escalion Can Do
 
@@ -56,16 +57,16 @@ that Escalion must do via web browsers. No further code changes are needed.
 
 ## What's Ready (Nothing to Change)
 
-- ✅ Expo SDK 49, RN 0.72, package `cheese2.escalion.ru`, v1.1.0
-- ✅ eas.json with `internal` profile (AAB build)
-- ✅ GitHub Actions workflow (build → download AAB → upload to Play Store)
-- ✅ Release notes (EN + RU), privacy policy, feature graphic, all icons
-- ✅ All M1-T8 features implemented and pushed to GitHub
-- ✅ AndroidManifest.xml, build.gradle (targetSdk 34, minSdk 21)
-- ✅ App icon (512x512), adaptive icon, splash, notification icon
-- ✅ GitHub repo: https://github.com/Escalion86/Cheese2 (branch: main, commit: cbd509a)
-- ✅ Privacy policy publicly accessible via raw.githubusercontent.com
-- ✅ GitHub Actions workflow active (ID: 280004951)
+- Expo SDK 49, RN 0.72, package `cheese2.escalion.ru`, v1.1.0
+- eas.json with `internal` profile (AAB build)
+- GitHub Actions workflow (build → download AAB → upload to Play Store)
+- Release notes (EN + RU), privacy policy, feature graphic, all icons
+- All M1-T8 features implemented and pushed to GitHub
+- AndroidManifest.xml, build.gradle (targetSdk 34, minSdk 21)
+- App icon (512x512), adaptive icon, splash, notification icon
+- GitHub repo: https://github.com/Escalion86/Cheese2 (branch: main, commit: c2421c7)
+- Privacy policy publicly accessible via raw.githubusercontent.com
+- GitHub Actions workflow active
 
 ## Why This Worker Cannot Proceed
 
@@ -78,29 +79,6 @@ that Escalion must do via web browsers. No further code changes are needed.
 - Cannot set GitHub Secrets programmatically (requires web UI auth)
 - npm install eas-cli times out on this network (too slow)
 - Windows PC (main dev machine) unreachable via SSH
-- Expo.dev unreachable from this network
-
-## Code Review Results (2026-05-26)
-
-All code has been reviewed for Play Store compliance:
-
-- ✅ Target SDK 34 (current requirement)
-- ✅ Min SDK 21 (Android 5.0+)
-- ✅ Adaptive icons (1024x1024)
-- ✅ Proper permission declarations (CAMERA, VIBRATE, INTERNET, MEDIA)
-- ✅ Privacy policy included and publicly accessible
-- ✅ Feature graphic (1024x500) present
-- ✅ App icon (1024x1024) present
-- ✅ Splash screen present
-- ✅ Notification icon present
-- ✅ Hermes JS engine enabled
-- ✅ App signing managed by EAS
-- ✅ Release notes comprehensive (EN + RU)
-- ✅ Storage permissions handled by Expo MediaLibrary (scoped storage compatible)
-- ✅ No RECORD_AUDIO permission (was removed in previous fix)
-
-**Minor note:** `requestLegacyExternalStorage="true"` in AndroidManifest.xml is deprecated
-on API 33+ but does not cause build failures. Expo MediaLibrary handles storage correctly.
 
 ## Worker Environment
 - Orange Pi 3B, ARM64 Linux, 7.5GB RAM (~4-5GB free), 201GB disk free
