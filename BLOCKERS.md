@@ -3,14 +3,13 @@
 **Date:** 2026-05-26
 **Task:** t_12199359
 **Status:** BLOCKED — requires manual credential setup by Escalion
-**Attempts:** 12+
+**Attempts:** 13+
 
 ## Blockers
 
 ### 1. No EXPO_TOKEN in GitHub Secrets (CRITICAL)
 - EAS Build requires an Expo access token to authenticate
 - `gh` CLI not authenticated — cannot check/set secrets via CLI
-- Workflow run #26411868004 failed at "Validate required secrets" step (attempt 11)
 - **Action needed:** Create token at https://expo.dev/settings/access-tokens
 - **Then:** Add as `EXPO_TOKEN` to GitHub Secrets at https://github.com/Escalion86/Cheese2/settings/secrets/actions
 
@@ -23,12 +22,14 @@
 ### 3. Cannot Build Locally on Orange Pi
 - Orange Pi is ARM64 Linux — no Android SDK/Gradle
 - EAS CLI `npm install -g eas-cli` times out (slow registry on ARM64)
-- Docker available but orangepi user has no permissions to Docker socket
+- Docker available but insufficient RAM (3.2GB available, need 8GB+ for Gradle)
+- Disk space OK (201GB free) but RAM is the bottleneck
 - **Workaround:** Use GitHub Actions workflow (cloud build) once secrets are set
 
 ### 4. GitHub `gh` CLI Not Authenticated
 - Cannot trigger GitHub Actions workflow or check secret status via CLI
-- **Action needed:** Either set secrets manually via GitHub UI, or run `gh auth login` with a PAT
+- GH_TOKEN env var exists but is invalid/expired (API returns "Bad credentials")
+- **Action needed:** Either set secrets manually via GitHub UI, or provide a valid PAT
 
 ## What's Ready
 
@@ -37,11 +38,12 @@
 - ✅ eas.json with `internal` profile (AAB build, internal distribution)
 - ✅ GitHub Actions workflow (`.github/workflows/android-internal-testing.yml`)
 - ✅ Release notes (English + Russian) in workflow + whatsnew/ directory
-- ✅ Privacy policy (`PRIVACY_POLICY.md`)
-- ✅ Feature graphic (1024x500)
-- ✅ App icon (1024x1024), adaptive icon, splash screen, notification icon
+- ✅ Privacy policy (`PRIVACY_POLICY.md`) — publicly accessible at:
+  `https://raw.githubusercontent.com/Escalion86/Cheese2/main/PRIVACY_POLICY.md`
+- ✅ Feature graphic (1024x500) — verified
+- ✅ App icon (1024x1024), adaptive icon, splash screen, notification icon — all verified
 - ✅ All M1-T8 features implemented
-- ✅ Code pushed to GitHub (branch: main)
+- ✅ Code pushed to GitHub (branch: main, commit: 190566e)
 - ✅ SSH git access works (can push commits)
 - ✅ AndroidManifest.xml with all required permissions
 - ✅ build.gradle with targetSdk 34, minSdk 21
@@ -51,7 +53,7 @@
 
 ## How to Unblock — Checklist for Escalion
 
-Everything is 100% ready on the code side. Only manual steps remain:
+Everything is 100% ready on the code side. Only manual steps remain.
 
 ### Step 1: Create Expo Access Token (2 min)
 1. Open https://expo.dev/settings/access-tokens
@@ -81,16 +83,16 @@ Everything is 100% ready on the code side. Only manual steps remain:
 4. Upload screenshots (need 2+ real device screenshots — can do after first build)
 5. Complete content rating questionnaire
 6. Complete data safety section
-7. Add privacy policy URL
+7. Add privacy policy URL: `https://raw.githubusercontent.com/Escalion86/Cheese2/main/PRIVACY_POLICY.md`
 8. Create Internal Testing track
 9. Add tester email addresses
 
 ### Step 5: Trigger Build (2 min)
 1. Push any commit to `main` OR use "Run workflow" on GitHub Actions tab
 2. Monitor at https://github.com/Escalion86/Cheese2/actions
-3. Build takes ~15-30 min
+3. Build takes ~15-30 min on EAS
 
-### Step 6: Upload to Play Console (5 min)
+### Step 6: Upload to Play Console (5 min for first release)
 1. Download AAB from GitHub Actions artifacts
 2. First upload must be manual via Play Console
 3. After first manual upload, CI/CD handles future uploads automatically
@@ -100,4 +102,6 @@ Everything is 100% ready on the code side. Only manual steps remain:
 - **Machine:** Orange Pi 3B (ARM64 Linux)
 - **Hostname:** orangepi
 - **OS:** Linux 6.6.0-rc5-rockchip-rk356x
-- **Limitations:** No Android SDK, no Gradle, slow npm registry, no GitHub credentials, no Docker permissions
+- **RAM:** 7.5GB total, 3.2GB available (insufficient for Android build)
+- **Disk:** 226GB total, 201GB free
+- **Limitations:** No Android SDK, no Gradle, slow npm registry, no GitHub credentials, no Docker permissions for orangepi user
