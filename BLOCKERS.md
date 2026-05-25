@@ -3,17 +3,21 @@
 **Date:** 2026-05-26
 **Task:** t_12199359
 **Status:** BLOCKED — requires manual credential setup by Escalion
-**Attempts:** 25+
+**Attempts:** 27+
 
-## Latest Check (2026-05-26 05:00)
+## Latest Check (2026-05-26 06:00)
 
-- Windows PC (192.168.1.125) unreachable via SSH (no route to host)
+- Windows PC (192.168.1.125) unreachable via SSH (no route to host, 100% packet loss)
 - gh CLI not authenticated (no GH_TOKEN, no browser auth possible on headless server)
-- EAS CLI not installed, npm install times out on this network
+- EAS CLI not installed, npm install times out on this network (too slow)
+- Expo.dev unreachable from this network
+- GitHub API reachable but no credentials to use it
 - Privacy policy URL verified: https://raw.githubusercontent.com/Escalion86/Cheese2/main/PRIVACY_POLICY.md → HTTP 200 ✅
 - Git push works (SSH key configured) ✅
-- Repo at commit ef266ee, branch main, clean working tree ✅
+- Repo at commit cbd509a, branch main, clean working tree ✅
 - GitHub Actions workflow exists and is active (ID: 280004951) ✅
+- All assets present (icon, adaptive icon, splash, notification icon, feature graphic) ✅
+- All M1-T8 features implemented and pushed ✅
 
 ## Summary
 
@@ -59,7 +63,7 @@ that Escalion must do via web browsers. No further code changes are needed.
 - ✅ All M1-T8 features implemented and pushed to GitHub
 - ✅ AndroidManifest.xml, build.gradle (targetSdk 34, minSdk 21)
 - ✅ App icon (512x512), adaptive icon, splash, notification icon
-- ✅ GitHub repo: https://github.com/Escalion86/Cheese2 (branch: main, commit: ef266ee)
+- ✅ GitHub repo: https://github.com/Escalion86/Cheese2 (branch: main, commit: cbd509a)
 - ✅ Privacy policy publicly accessible via raw.githubusercontent.com
 - ✅ GitHub Actions workflow active (ID: 280004951)
 
@@ -74,6 +78,7 @@ that Escalion must do via web browsers. No further code changes are needed.
 - Cannot set GitHub Secrets programmatically (requires web UI auth)
 - npm install eas-cli times out on this network (too slow)
 - Windows PC (main dev machine) unreachable via SSH
+- Expo.dev unreachable from this network
 
 ## Code Review Results (2026-05-26)
 
