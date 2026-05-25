@@ -4,7 +4,7 @@ import * as Notifications from 'expo-notifications'
 import {
   registerForPushNotificationsAsync,
   getInitialNotification,
-} from './notifications'
+} from '../services/notifications'
 
 /**
  * React hook for Expo Notifications.
