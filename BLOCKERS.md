@@ -3,13 +3,13 @@
 **Date:** 2026-05-26
 **Task:** t_12199359
 **Status:** BLOCKED — requires manual credential setup by Escalion
-**Attempts:** 16+
+**Attempts:** 18+
 
 ## Blockers
 
 ### 1. No EXPO_TOKEN in GitHub Secrets (CRITICAL)
 - EAS Build requires an Expo access token to authenticate
-- `gh` CLI not authenticated — cannot check/set secrets via CLI
+- No GitHub credentials available on Orange Pi (GH_TOKEN is Hermes-internal, not a GitHub PAT)
 - **Action needed:** Create token at https://expo.dev/settings/access-tokens
 - **Then:** Add as `EXPO_TOKEN` to GitHub Secrets at https://github.com/Escalion86/Cheese2/settings/secrets/actions
 
@@ -21,16 +21,16 @@
 
 ### 3. Cannot Build Locally on Orange Pi
 - Orange Pi is ARM64 Linux — no Android SDK/Gradle
-- EAS CLI `npx eas-cli` times out (slow npm registry on ARM64 — 60s+ just to install)
-- Docker available but insufficient RAM (4.0GB available, need 8GB+ for Gradle)
+- EAS CLI installed but binary not linked globally
+- Docker available but insufficient RAM (4-5GB available, need 8GB+ for Gradle)
 - Disk space OK (201GB free) but RAM is the bottleneck
-- **Workaround:** Use GitHub Actions workflow (cloud build) once secrets are set
+- **Workaround:** Use GitHub Actions workflow (cloud build via EAS) once secrets are set
 
 ### 4. GitHub `gh` CLI Not Authenticated
 - Cannot trigger GitHub Actions workflow or check secret status via CLI
-- No `GH_TOKEN` or `GITHUB_TOKEN` env vars set
+- GH_TOKEN env var is Hermes-internal, not a GitHub PAT
 - No `~/.config/gh/hosts.yml` configured
-- **Action needed:** Run `gh auth login` or set `GH_TOKEN` env var with a valid PAT
+- **Action needed:** Either set up `gh auth login` or use GitHub web UI
 
 ## What's Ready
 
@@ -38,13 +38,12 @@
 - ✅ app.json with package `cheese2.escalion.ru`, version 1.1.0, versionCode 2
 - ✅ eas.json with `internal` profile (AAB build, internal distribution)
 - ✅ GitHub Actions workflow (`.github/workflows/android-internal-testing.yml`)
-- ✅ Release notes (English + Russian) in workflow + whatsnew/ directory
-- ✅ Privacy policy (`PRIVACY_POLICY.md`) — publicly accessible
+- ✅ Release notes (English + Russian) in workflow
+- ✅ Privacy policy (`PRIVACY_POLICY.md`) — publicly accessible via raw.githubusercontent.com
 - ✅ Feature graphic (1024x500)
 - ✅ App icon, adaptive icon, splash screen, notification icon
 - ✅ All M1-T8 features implemented
-- ✅ Code pushed to GitHub (branch: main, commit: 179f4f9)
-- ✅ SSH git access works (can push commits)
+- ✅ Code pushed to GitHub (branch: main, latest commit: 90bdbdb)
 - ✅ AndroidManifest.xml with all required permissions
 - ✅ build.gradle with targetSdk 34, minSdk 21
 - ✅ GITHUB_SECRETS.md with detailed setup instructions
@@ -78,9 +77,9 @@ Everything is 100% ready on the code side. Only manual steps remain.
 
 ### Step 4: Complete Play Console Listing (20-30 min)
 1. Fill store listing (name, short description, full description)
-2. Upload app icon (512x512 PNG)
-3. Upload feature graphic (1024x500)
-4. Upload screenshots (2+ real device screenshots)
+2. Upload app icon (512x512 PNG — exists in repo)
+3. Upload feature graphic (1024x500 — exists in repo)
+4. Upload screenshots (2+ real device screenshots — need real device)
 5. Complete content rating questionnaire
 6. Complete data safety section
 7. Add privacy policy URL: `https://raw.githubusercontent.com/Escalion86/Cheese2/main/PRIVACY_POLICY.md`
@@ -94,36 +93,32 @@ Everything is 100% ready on the code side. Only manual steps remain.
 
 ### Step 6: Upload to Play Console (5 min for first release)
 1. Download AAB from GitHub Actions artifacts
-2. First upload must be manual via Play Console
-3. After first manual upload, CI/CD handles future uploads
+2. First upload MUST be manual via Play Console
+3. After first manual upload, CI/CD handles future uploads automatically
 
 ## Worker Environment
 
 - **Machine:** Orange Pi 3B (ARM64 Linux)
 - **Hostname:** orangepi
 - **OS:** Linux 6.6.0-rc5-rockchip-rk356x
-- **RAM:** 7.5GB total, 4.0GB available (insufficient for Android build)
-- **Disk:** 226GB total, 201GB free
-- **Network:** slow npm registry on ARM64 (eas-cli install times out at 60s+)
+- **RAM:** ~7.5GB total, ~4-5GB available (insufficient for Android build)
+- **Disk:** 226GB total, ~201GB free
+- **Network:** slow npm registry on ARM64
 - **Limitations:** No Android SDK, no Gradle, no GitHub credentials, no Docker permissions for orangepi user
 
 ---
 
-## Attempt 17 (2026-05-26)
+## Attempt 18 (2026-05-26)
 
 ### Status: SAME BLOCKERS
-- `gh` CLI still not authenticated (no GH_TOKEN, no `gh auth login`)
-- Cannot check/set GitHub secrets via CLI
-- Cannot trigger GitHub Actions workflow via CLI
-- EAS CLI installed but binary not linked globally (`npm list -g eas-cli` shows installed but `eas` command not found in PATH)
-- Workflow confirmed active via GitHub API: ID 280004951, state=active
-- Repo API accessible without auth: workflow file exists
-- No change in available RAM (5.4GB free) — still insufficient for local Android build
-
-### New Finding
-- EAS CLI package installed at `/home/orangepi/.hermes/node/lib/node_modules/eas-cli/` but bin not symlinked
-- Could potentially fix with `npm link eas-cli` or direct `npx eas-cli` invocation
-- BUT: still needs EXPO_TOKEN to actually build
+- GH_TOKEN confirmed Hermes-internal (not GitHub PAT) — cannot authenticate to GitHub API
+- `gh` CLI not authenticated, no device flow possible (headless)
+- Cannot check/set GitHub secrets via any CLI method
+- Cannot trigger GitHub Actions workflow via API
+- Latest commit pushed to GitHub: 90bdbdb
+- No change in available RAM — still insufficient for local Android build
+- EAS CLI package installed but binary not linked globally
 
 ### Conclusion
 All blockers remain manual credential setup tasks. No code-side changes needed.
+The task is 100% ready on the code/infrastructure side.
