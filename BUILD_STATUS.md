@@ -1,10 +1,11 @@
 # Android Internal Testing Build — Status Report
 **Date:** 2026-05-25
 **Task:** t_12199359
+**Repo:** https://github.com/Escalion86/Cheese2 (branch: main, commit: 10220e6)
 
 ## Summary
 
-The CI/CD pipeline for Android Internal Testing is fully configured in the GitHub repository.
+The CI/CD pipeline for Android Internal Testing is fully configured.
 The build CANNOT be completed from Orange Pi — it requires cloud build infrastructure (EAS Build)
 and credentials that must be configured manually.
 
@@ -32,6 +33,14 @@ and credentials that must be configured manually.
 - Deep link scheme: `cheese2.escalion.ru`
 - RECORD_AUDIO permission removed (previous fix)
 
+### Assets (all present)
+- App icon: 512x500 PNG — `assets/images/icon.png` ✅
+- Adaptive icon: `assets/images/adaptive-icon.png` ✅
+- Splash screen: `assets/images/splash.png` ✅
+- Notification icon: `assets/images/notification-icon.png` ✅
+- Feature graphic: 1024x500 PNG — `assets/images/feature-graphic.png` ✅ (created 2026-05-25)
+- Screenshots: ❌ NOT CREATED (need device screenshots after first build)
+
 ### Documentation
 - `BUILD_GUIDE.md` — full build guide
 - `RELEASE_NOTES.md` — v1.1.0 release notes with M1-T8 features
@@ -54,11 +63,11 @@ Must be done at: https://play.google.com/console
 - [ ] App created with package `cheese2.escalion.ru`
 - [ ] Store listing completed (name, description, category)
 - [ ] App icon uploaded (512x512 PNG — exists in assets)
-- [ ] Feature graphic uploaded (1024x500 PNG/JPG — NOT created yet)
-- [ ] Screenshots uploaded (min 2 per device type — NOT created yet)
+- [ ] Feature graphic uploaded (1024x500 PNG — exists in assets, created 2026-05-25)
+- [ ] Screenshots uploaded (min 2 per device type — need real device screenshots)
 - [ ] Content rating questionnaire completed
 - [ ] Data safety section completed
-- [ ] Privacy policy URL configured (can use GitHub Pages)
+- [ ] Privacy policy URL configured (can use GitHub Pages or raw.githubusercontent.com)
 - [ ] Internal Testing track created
 - [ ] Internal testers added (email addresses)
 
@@ -81,10 +90,10 @@ After that, automated uploads via the GitHub Actions workflow will work.
 2. Upload feature graphic (1024x500) and screenshots
 3. Complete content rating questionnaire
 4. Complete data safety section
-5. Add privacy policy URL
+5. Add privacy policy URL (e.g. https://escalion86.github.io/Cheese2/PRIVACY_POLICY.md)
 
 ### Step 3: Trigger Build
-1. Push to `main` branch (or use manual workflow dispatch)
+1. Push to `main` branch (or use manual workflow dispatch on GitHub)
 2. Monitor at: https://github.com/Escalion86/Cheese2/actions
 3. Check EAS build logs at: https://expo.dev/accounts/escalion/projects/Cheese2/builds
 
@@ -118,3 +127,4 @@ After that, automated uploads via the GitHub Actions workflow will work.
 - All data is stored locally (no external servers)
 - Push notifications use Expo's service (no google-services.json needed)
 - App signing is managed by EAS
+- Feature graphic created programmatically (1024x500 PNG, dark theme with card suits)
