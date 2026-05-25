@@ -43,42 +43,64 @@ jobs:
           echo "=== EAS Submit Internal ==="
           cat eas.json | jq '.submit.internal'
 
-      - name: Setup EAS
-        uses: expo/expo-github-action@v8
-        with:
-          eas-version: latest
-          token: ${{ secrets.EXPO_TOKEN }}
+      - name: Validate required secrets
+        run: |
+          echo "=== Checking GitHub Secrets ==="
+          MISSING=0
+          if [ -z "${{ secrets.EXPO_TOKEN }}" ]; then
+            echo "ERROR: EXPO_TOKEN secret is not set!"
+            echo "Go to: https://github.com/Escalion86/Cheese2/settings/secrets/actions"
+            echo "Create EXPO_TOKEN at: https://expo.dev/settings/access-tokens"
+            MISSING=1
+          else
+            echo "EXPO_TOKEN: configured"
+          fi
+          exit $MISSING
+
+      - name: Install EAS CLI
+        run: |
+          echo "Installing EAS CLI..."
+          npm install -g eas-cli@latest
+          echo "EAS CLI version:"
+          eas --version
+
+      - name: Login to EAS
+        run: |
+          echo "Authenticating with EAS..."
+          eas login --non-interactive --token "${{ secrets.EXPO_TOKEN }}"
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
       - name: Build Android AAB (Internal profile)
         id: build
         run: |
           echo "::group::EAS Build Output"
-          
+
           BUILD_EXIT_CODE=0
           BUILD_OUTPUT=$(eas build --platform android --profile internal --non-interactive 2>&1) || BUILD_EXIT_CODE=$?
-          
+
           echo "$BUILD_OUTPUT"
           echo "::endgroup::"
-          
+
           # Parse the build ID from output
           BUILD_ID=$(echo "$BUILD_OUTPUT" | grep -oP 'Build ID:\s*\K[a-zA-Z0-9-]+' | head -1)
-          
+
           if [ -z "$BUILD_ID" ]; then
             BUILD_ID=$(echo "$BUILD_OUTPUT" | grep -oP '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -1)
           fi
-          
+
           echo "build_id=$BUILD_ID" >> "$GITHUB_OUTPUT"
-          
+
           # Extract build URL
           BUILD_URL=$(echo "$BUILD_OUTPUT" | grep -oP 'https://expo\.dev/accounts/[^/]+/projects/[^/]+/builds/[a-zA-Z0-9-]+' | head -1)
           echo "build_url=$BUILD_URL" >> "$GITHUB_OUTPUT"
-          
+
           echo ""
           echo "=== Build Summary ==="
           echo "Build ID: $BUILD_ID"
           echo "Build URL: $BUILD_URL"
           echo "Exit Code: $BUILD_EXIT_CODE"
-          
+
           if echo "$BUILD_OUTPUT" | grep -qi "Build.*finished\|Build.*completed\|Build.*succeeded\|buildUrl"; then
             echo "status=finished" >> "$GITHUB_OUTPUT"
             echo "Status: FINISHED"
@@ -106,13 +128,13 @@ jobs:
         if: steps.build.outputs.build_id != ''
         run: |
           mkdir -p build
-          
+
           echo "Fetching build info from EAS API..."
           BUILD_INFO=$(curl -s -H "Authorization: Bearer ${{ secrets.EXPO_TOKEN }}" \
             "https://api.expo.dev/v2/projects/7676a13a-3d4a-4da0-ad23-5b4df7b3bb38/builds/${{ steps.build.outputs.build_id }}")
-          
+
           AAB_URL=$(echo "$BUILD_INFO" | jq -r '.artifacts.buildUrl // empty')
-          
+
           if [ -n "$AAB_URL" ] && [ "$AAB_URL" != "null" ]; then
             echo "Downloading AAB from: $AAB_URL"
             curl -L -o build/app.aab "$AAB_URL"
@@ -121,7 +143,7 @@ jobs:
             echo "$BUILD_INFO" | jq '.artifacts // "No artifacts"'
             exit 1
           fi
-          
+
           echo ""
           echo "=== AAB File ==="
           ls -la build/
@@ -173,54 +195,48 @@ jobs:
           fi
           echo "AAB size: $(du -h build/app.aab | cut -f1)"
 
-      - name: Prepare release notes for Play Store
-        id: release_notes
+      - name: Validate Google Play secret
         run: |
-          mkdir -p whatsnew
-
-          CUSTOM_NOTES="${{ github.event.inputs.release_notes }}"
-
-          if [ -n "$CUSTOM_NOTES" ] && [ "$CUSTOM_NOTES" != "Internal testing build" ]; then
-            printf '%s' "$CUSTOM_NOTES" > whatsnew/whatsnew-en-US
-            printf '%s' "$CUSTOM_NOTES" > whatsnew/whatsnew-ru-RU
+          if [ -z "${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}" ]; then
+            echo "ERROR: GOOGLE_PLAY_SERVICE_ACCOUNT_JSON secret is not set!"
+            echo "Go to: https://github.com/Escalion86/Cheese2/settings/secrets/actions"
+            echo "See: GITHUB_SECRETS.md for setup instructions"
+            exit 1
           else
-            python3 -c "
-          import pathlib
-          pathlib.Path('whatsnew/whatsnew-en-US').write_text('''Internal testing build v1.1.0
-
-          Features:
-          - Photo enhancement with playing card overlay
-          - Camera photo capture and preview
-          - Media library integration for saving photos
-          - Push notification support
-          - Auto-rotate via device motion sensors
-          - Dark/Light theme toggle
-          - Settings persistence
-          - About screen with developer info
-
-          Testing focus: camera, card overlay, notifications, theme switching, settings persistence
-          ''')
-          pathlib.Path('whatsnew/whatsnew-ru-RU').write_text('''Внутренняя тестовая сборка v1.1.0
-
-          Функции:
-          - Обработка фото с наложением игральной карты
-          - Фотосъёмка с камеры и предпросмотр
-          - Интеграция с медиабиблиотекой для сохранения фото
-          - Поддержка push-уведомлений
-          - Автоповорот через датчики движения
-          - Переключение тёмной/светлой темы
-          - Сохранение настроек
-          - Экран «О приложении» с информацией о разработчике
-
-          Фокус тестирования: камера, наложение карты, уведомления, переключение темы, сохранение настроек
-          ''')
-          "
+            echo "GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: configured"
           fi
 
-          echo "=== Release notes (EN) ==="
+      - name: Write release notes (English)
+        run: |
+          mkdir -p whatsnew
+          CUSTOM_NOTES="${{ github.event.inputs.release_notes }}"
+          if [ -n "$CUSTOM_NOTES" ] && [ "$CUSTOM_NOTES" != "Internal testing build" ]; then
+            printf '%s' "$CUSTOM_NOTES" > whatsnew/whatsnew-en-US
+          else
+            echo 'Internal testing build v1.1.0' > whatsnew/whatsnew-en-US
+            echo '' >> whatsnew/whatsnew-en-US
+            echo 'Features:' >> whatsnew/whatsnew-en-US
+            echo '- Photo enhancement with playing card overlay' >> whatsnew/whatsnew-en-US
+            echo '- Camera photo capture and preview' >> whatsnew/whatsnew-en-US
+            echo '- Media library integration for saving photos' >> whatsnew/whatsnew-en-US
+            echo '- Push notification support' >> whatsnew/whatsnew-en-US
+            echo '- Auto-rotate via device motion sensors' >> whatsnew/whatsnew-en-US
+            echo '- Dark/Light theme toggle' >> whatsnew/whatsnew-en-US
+            echo '- Settings persistence' >> whatsnew/whatsnew-en-US
+            echo '- About screen with developer info' >> whatsnew/whatsnew-en-US
+            echo '' >> whatsnew/whatsnew-en-US
+            echo 'Testing focus: camera, card overlay, notifications, theme switching, settings persistence' >> whatsnew/whatsnew-en-US
+          fi
           cat whatsnew/whatsnew-en-US
-          echo ""
-          echo "=== Release notes (RU) ==="
+
+      - name: Write release notes (Russian)
+        run: |
+          CUSTOM_NOTES="${{ github.event.inputs.release_notes }}"
+          if [ -n "$CUSTOM_NOTES" ] && [ "$CUSTOM_NOTES" != "Internal testing build" ]; then
+            printf '%s' "$CUSTOM_NOTES" > whatsnew/whatsnew-ru-RU
+          else
+            printf '%s\n' 'Внутренняя тестовая сборка v1.1.0' '' 'Функции:' '- Обработка фото с наложением игральной карты' '- Фотосъёмка с камеры и предпросмотр' '- Интеграция с медиабиблиотекой для сохранения фото' '- Поддержка push-уведомлений' '- Автоповорот через датчики движения' '- Переключение тёмной/светлой темы' '- Сохранение настроек' '- Экран «О приложении» с информацией о разработчике' '' 'Фокус тестирования: камера, наложение карты, уведомления, переключение темы, сохранение настроек' > whatsnew/whatsnew-ru-RU
+          fi
           cat whatsnew/whatsnew-ru-RU
 
       - name: Upload to Google Play
