@@ -3,122 +3,65 @@
 **Date:** 2026-05-26
 **Task:** t_12199359
 **Status:** BLOCKED — requires manual credential setup by Escalion
-**Attempts:** 18+
+**Attempts:** 21+
 
-## Blockers
+## Summary
 
-### 1. No EXPO_TOKEN in GitHub Secrets (CRITICAL)
-- EAS Build requires an Expo access token to authenticate
-- No GitHub credentials available on Orange Pi (GH_TOKEN is Hermes-internal, not a GitHub PAT)
-- **Action needed:** Create token at https://expo.dev/settings/access-tokens
-- **Then:** Add as `EXPO_TOKEN` to GitHub Secrets at https://github.com/Escalion86/Cheese2/settings/secrets/actions
+Everything on the code/CI side is 100% ready. The ONLY blockers are manual steps
+that Escalion must do via web browsers. No further code changes are needed.
 
-### 2. No GOOGLE_PLAY_SERVICE_ACCOUNT_JSON in GitHub Secrets (CRITICAL)
-- Google Play upload requires a service account JSON key
-- No key found anywhere on the server
-- **Action needed:** Create service account at Google Play Console → Settings → API access
-- **Then:** Add as `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` to GitHub Secrets
+## What ONLY Escalion Can Do
 
-### 3. Cannot Build Locally on Orange Pi
-- Orange Pi is ARM64 Linux — no Android SDK/Gradle
-- EAS CLI installed but binary not linked globally
-- Docker available but insufficient RAM (4-5GB available, need 8GB+ for Gradle)
-- Disk space OK (201GB free) but RAM is the bottleneck
-- **Workaround:** Use GitHub Actions workflow (cloud build via EAS) once secrets are set
+### 1. Create Expo Access Token (2 min)
+- Open https://expo.dev/settings/access-tokens
+- Click "Create Token", name it "GitHub Actions EAS Build"
+- Copy the token (starts with `expo_...`)
 
-### 4. GitHub `gh` CLI Not Authenticated
-- Cannot trigger GitHub Actions workflow or check secret status via CLI
-- GH_TOKEN env var is Hermes-internal, not a GitHub PAT
-- No `~/.config/gh/hosts.yml` configured
-- **Action needed:** Either set up `gh auth login` or use GitHub web UI
+### 2. Add GitHub Secrets (3 min)
+- Open https://github.com/Escalion86/Cheese2/settings/secrets/actions
+- Add `EXPO_TOKEN` with the Expo token value
+- Add `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` with Google Play service account JSON
 
-## What's Ready
+### 3. Google Play Console Setup (30 min)
+- Create app with package `cheese2.escalion.ru`
+- Complete store listing, content rating, data safety
+- Upload icon (512x512), feature graphic (1024x500), screenshots (min 2)
+- Create service account at Settings → API access → "Release Manager" role
+- Create Internal Testing track, add tester emails
+- Set privacy policy URL (e.g. https://escalion86.github.io/Cheese2/PRIVACY_POLICY.md)
 
-- ✅ Expo project configured (SDK 49, RN 0.72)
-- ✅ app.json with package `cheese2.escalion.ru`, version 1.1.0, versionCode 2
-- ✅ eas.json with `internal` profile (AAB build, internal distribution)
-- ✅ GitHub Actions workflow (`.github/workflows/android-internal-testing.yml`)
-- ✅ Release notes (English + Russian) in workflow
-- ✅ Privacy policy (`PRIVACY_POLICY.md`) — publicly accessible via raw.githubusercontent.com
-- ✅ Feature graphic (1024x500)
-- ✅ App icon, adaptive icon, splash screen, notification icon
-- ✅ All M1-T8 features implemented
-- ✅ Code pushed to GitHub (branch: main, latest commit: 90bdbdb)
-- ✅ AndroidManifest.xml with all required permissions
-- ✅ build.gradle with targetSdk 34, minSdk 21
-- ✅ GITHUB_SECRETS.md with detailed setup instructions
-- ✅ BUILD_GUIDE.md with full build guide
-- ✅ RELEASE_NOTES.md with v1.1.0 release notes and testing instructions
+### 4. Trigger Build (2 min)
+- Push to `main` or use "Run workflow" on GitHub Actions tab
+- Monitor at https://github.com/Escalion86/Cheese2/actions
 
-## How to Unblock — Checklist for Escalion
+### 5. First Manual Upload (5 min) — REQUIRED by Google Play
+- Download AAB from GitHub Actions artifacts
+- Upload manually to Play Console → Internal Testing → Create new release
+- Fill in release notes, review and roll out
+- After this, CI/CD handles future uploads automatically
 
-Everything is 100% ready on the code side. Only manual steps remain.
+## What's Ready (Nothing to Change)
 
-### Step 1: Create Expo Access Token (2 min)
-1. Open https://expo.dev/settings/access-tokens
-2. Click "Create Token"
-3. Name: `GitHub Actions EAS Build`
-4. Copy the token value (starts with `expo_...`)
+- ✅ Expo SDK 49, RN 0.72, package `cheese2.escalion.ru`, v1.1.0
+- ✅ eas.json with `internal` profile (AAB build)
+- ✅ GitHub Actions workflow (build → download AAB → upload to Play Store)
+- ✅ Release notes (EN + RU), privacy policy, feature graphic, all icons
+- ✅ All M1-T8 features implemented and pushed to GitHub
+- ✅ AndroidManifest.xml, build.gradle (targetSdk 34, minSdk 21)
+- ✅ App icon (512x512), adaptive icon, splash, notification icon
+- ✅ GitHub repo: https://github.com/Escalion86/Cheese2 (branch: main, commit: 83ae63c)
 
-### Step 2: Set GitHub Secrets (3 min)
-1. Open https://github.com/Escalion86/Cheese2/settings/secrets/actions
-2. Click "New repository secret"
-3. Name: `EXPO_TOKEN`, Value: <token from Step 1>
-4. Click "Add secret"
-5. Repeat for `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` (Step 3)
+## Why This Worker Cannot Proceed
 
-### Step 3: Create Google Play Service Account (10 min)
-1. Open https://play.google.com/console
-2. Create app with package `cheese2.escalion.ru`
-3. Go to Settings → API access
-4. Create service account with "Release Manager" role
-5. Download JSON key
-6. Paste full JSON content into `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` secret
-
-### Step 4: Complete Play Console Listing (20-30 min)
-1. Fill store listing (name, short description, full description)
-2. Upload app icon (512x512 PNG — exists in repo)
-3. Upload feature graphic (1024x500 — exists in repo)
-4. Upload screenshots (2+ real device screenshots — need real device)
-5. Complete content rating questionnaire
-6. Complete data safety section
-7. Add privacy policy URL: `https://raw.githubusercontent.com/Escalion86/Cheese2/main/PRIVACY_POLICY.md`
-8. Create Internal Testing track
-9. Add tester email addresses
-
-### Step 5: Trigger Build (2 min)
-1. Push any commit to `main` OR use "Run workflow" on GitHub Actions tab
-2. Monitor at https://github.com/Escalion86/Cheese2/actions
-3. Build takes ~15-30 min on EAS
-
-### Step 6: Upload to Play Console (5 min for first release)
-1. Download AAB from GitHub Actions artifacts
-2. First upload MUST be manual via Play Console
-3. After first manual upload, CI/CD handles future uploads automatically
+- Orange Pi ARM64 has no Android SDK/Gradle — cannot build locally
+- Insufficient RAM (4-5GB available) for Docker-based Android build
+- No GitHub credentials (gh CLI not authenticated, headless server)
+- No Expo token available anywhere on the system
+- No Google Play service account JSON available
+- First AAB upload MUST be manual (Google Play policy)
+- Cannot set GitHub Secrets programmatically (requires web UI auth)
 
 ## Worker Environment
-
-- **Machine:** Orange Pi 3B (ARM64 Linux)
-- **Hostname:** orangepi
-- **OS:** Linux 6.6.0-rc5-rockchip-rk356x
-- **RAM:** ~7.5GB total, ~4-5GB available (insufficient for Android build)
-- **Disk:** 226GB total, ~201GB free
-- **Network:** slow npm registry on ARM64
-- **Limitations:** No Android SDK, no Gradle, no GitHub credentials, no Docker permissions for orangepi user
-
----
-
-## Attempt 18 (2026-05-26)
-
-### Status: SAME BLOCKERS
-- GH_TOKEN confirmed Hermes-internal (not GitHub PAT) — cannot authenticate to GitHub API
-- `gh` CLI not authenticated, no device flow possible (headless)
-- Cannot check/set GitHub secrets via any CLI method
-- Cannot trigger GitHub Actions workflow via API
-- Latest commit pushed to GitHub: 90bdbdb
-- No change in available RAM — still insufficient for local Android build
-- EAS CLI package installed but binary not linked globally
-
-### Conclusion
-All blockers remain manual credential setup tasks. No code-side changes needed.
-The task is 100% ready on the code/infrastructure side.
+- Orange Pi 3B, ARM64 Linux, 7.5GB RAM (~4-5GB free), 201GB disk free
+- No Android SDK, no Gradle, no GitHub auth, no Expo auth
+- SSH key exists for GitHub (code push works) but gh CLI is not authenticated
