@@ -1,9 +1,9 @@
 # Android Internal Testing Build — Blocker Report
 
-**Date:** 2026-05-26 07:30
+**Date:** 2026-05-26 08:00
 **Task:** t_12199359
 **Status:** BLOCKED — requires manual actions by Escalion
-**Attempts:** 37+
+**Attempts:** 38+
 **Latest CI Run:** #41 (failed — missing EXPO_TOKEN)
 
 ## Current State
@@ -29,7 +29,13 @@ The ONLY blocker is missing GitHub Secrets that must be set manually.
 2. Add secret: `EXPO_TOKEN` = <token from step 1>
 3. Add secret: `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` = <JSON from Play Console>
 
-### Step 3: Google Play Console (~30 min)
+### Step 3: Enable GitHub Pages for Privacy Policy (~2 min)
+1. Go to https://github.com/Escalion86/Cheese2/settings/pages
+2. Source: Deploy from branch → main → / (root) → Save
+3. Wait ~1 min for deployment
+4. Verify: https://escalion86.github.io/Cheese2/PRIVACY_POLICY.md
+
+### Step 4: Google Play Console (~30 min)
 1. Go to https://play.google.com/console
 2. Create app with package `cheese2.escalion.ru`
 3. Fill store listing (name, short description, full description)
@@ -45,11 +51,11 @@ The ONLY blocker is missing GitHub Secrets that must be set manually.
 13. Create Internal Testing track
 14. Add tester email addresses
 
-### Step 4: Trigger Build
+### Step 5: Trigger Build
 Once secrets are set, push any commit to main or use "Run workflow" on GitHub Actions tab.
 Monitor at: https://github.com/Escalion86/Cheese2/actions
 
-### Step 5: First Manual Upload (REQUIRED by Google Play)
+### Step 6: First Manual Upload (REQUIRED by Google Play)
 First AAB upload MUST be manual:
 1. Download AAB from GitHub Actions artifacts
 2. Go to Play Console → Internal Testing → Create new release
@@ -62,10 +68,11 @@ First AAB upload MUST be manual:
 - eas.json with `internal` profile (AAB build)
 - GitHub Actions workflow (build → download AAB → upload to Play Store)
 - Release notes (EN + RU), privacy policy, feature graphic, all icons/splash
-- All M1-T8 features implemented on GitHub (commit ad263d0)
+- All M1-T8 features implemented (see BUILD_STATUS.md for details)
 - AndroidManifest.xml, build.gradle (targetSdk 34, minSdk 21)
 - App signing managed by EAS
 - Push notifications via Expo (no google-services.json needed)
+- EAS CLI v19.1.0 installed on Orange Pi (for local use if needed)
 
 ## Worker Limitations (Cannot Build Here)
 
@@ -73,4 +80,3 @@ First AAB upload MUST be manual:
 - Insufficient RAM for Docker-based Android build
 - gh CLI not authenticated (cannot set secrets programmatically)
 - No Expo/Google Play credentials on this machine
-- npm install eas-cli times out on this network
