@@ -3,8 +3,8 @@
 **Date:** 2026-05-26
 **Task:** t_12199359
 **Status:** BLOCKED — requires manual actions by Escalion
-**Attempts:** 42+
-**GitHub Secrets:** 0 configured (gh CLI not authenticated)
+**Attempts:** 43+
+**GitHub Secrets:** 0 configured (confirmed via API: all 46 runs failed at "Validate required secrets" step)
 
 ## Current State
 
