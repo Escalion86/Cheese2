@@ -2,11 +2,13 @@
 **Date:** 2026-05-26
 **Task:** t_12199359
 **Repo:** https://github.com/Escalion86/Cheese2 (branch: main)
-**Attempts:** 55+ (ALL blocked on missing credentials — no change)
+**Attempts:** 57+ (ALL blocked on missing credentials — no change)
 
 ## Summary
 
 All code is 100% ready. CI/CD pipeline is fully configured. Build CANNOT proceed without two credentials that only Escalion can create.
+EAS CLI is installed on Orange Pi but not logged in (requires EXPO_TOKEN).
+gh CLI is NOT authenticated (cannot check/set GitHub secrets).
 
 ## What's READY (100%) ✅
 
@@ -44,13 +46,19 @@ All code is 100% ready. CI/CD pipeline is fully configured. Build CANNOT proceed
 - Add internal testers (emails)
 - First AAB upload must be manual (Google policy)
 
+### 4. GitHub CLI Authentication on Orange Pi
+- Run: `gh auth login` on Orange Pi (or set GH_TOKEN env var)
+- Needed for worker to verify secrets are set and trigger workflows
+
 ## How to Complete (Escalion action required)
 
 1. Create EXPO_TOKEN → add to GitHub secrets
 2. Create Google Play service account → add JSON to GitHub secrets
 3. Complete Play Console app setup
-4. Push to main → GitHub Actions builds + uploads automatically
-5. Manual first upload via Play Console (Google requirement for first release)
+4. Enable GitHub Pages for privacy policy
+5. Authenticate gh CLI on Orange Pi: `gh auth login`
+6. Push to main → GitHub Actions builds + uploads automatically
+7. Manual first upload via Play Console (Google requirement for first release)
 
 ## Files Changed (this task)
 
@@ -64,3 +72,10 @@ All code is 100% ready. CI/CD pipeline is fully configured. Build CANNOT proceed
 - `BUILD_STATUS.md` — this file
 - `store-listing/` — Play Store listing assets
 - All M1-T8 feature code (completed in prior tasks)
+
+## History
+
+- 2026-05-21: Task created, initial analysis
+- 2026-05-21: CI/CD pipeline created, eas.json configured
+- 2026-05-21-26: 57+ attempts, all blocked on missing credentials
+- Latest commit: 7e704af
