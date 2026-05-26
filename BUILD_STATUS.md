@@ -1,13 +1,14 @@
 # Android Internal Testing Build — Status Report
 **Date:** 2026-05-26
 **Task:** t_12199359
-**Repo:** https://github.com/Escalion86/Cheese2 (branch: main, commit: 71de21b)
-**Attempts:** 48+ (ALL blocked on missing credentials)
+**Repo:** https://github.com/Escalion86/Cheese2 (branch: main, commit: 47a8c84)
+**Attempts:** 54+ (ALL blocked on missing credentials)
 
 ## Summary
 
 The CI/CD pipeline for Android Internal Testing is fully configured.
 The build CANNOT be completed without credentials that must be created manually by Escalion.
+No progress since previous attempt — same blockers remain.
 
 ## What's READY (100%)
 
@@ -23,6 +24,8 @@ The build CANNOT be completed without credentials that must be created manually 
 - AndroidManifest.xml, build.gradle (targetSdk 34, minSdk 21)
 - App signing managed by EAS (no keystore needed)
 - Push notifications via Expo (no google-services.json needed)
+- Git repo is clean and synced with origin/main
+- EAS CLI v19.1.0 installed on Orange Pi (but cannot authenticate without token)
 
 ## What's BLOCKING (credentials missing)
 
@@ -46,9 +49,9 @@ The build CANNOT be completed without credentials that must be created manually 
 - Internal Testing track created with testers added
 - **First AAB upload must be manual** via Play Console (Google requirement)
 
-### 4. gh CLI Not Authenticated ❌
-- Cannot set GitHub secrets from Orange Pi
-- Cannot verify if secrets have been set
+### 4. gh CLI / GitHub Token ❌
+- No valid GitHub token available on Orange Pi
+- Cannot set GitHub secrets programmatically
 - Escalion must set secrets manually via GitHub web UI
 
 ## How to Complete
