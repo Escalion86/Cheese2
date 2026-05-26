@@ -1,22 +1,15 @@
 # Android Internal Testing Build — Blocker Report
 
-**Date:** 2026-05-26 08:00
+**Date:** 2026-05-26
 **Task:** t_12199359
 **Status:** BLOCKED — requires manual actions by Escalion
-**Attempts:** 39+
-**Latest CI Run:** #42 (failed — missing EXPO_TOKEN)
-**GitHub Secrets:** 0 configured (verified via API)
+**Attempts:** 40+
+**GitHub Secrets:** 0 configured
 
 ## Current State
 
-ALL code is 100% ready. The CI/CD pipeline is fully configured and tested.
+ALL code is 100% ready. The CI/CD pipeline is fully configured.
 The ONLY blocker is missing GitHub Secrets that must be set manually.
-
-### Latest CI Run Failure
-- Run #42 failed at step "Validate required secrets"
-- EXPO_TOKEN is NOT set → workflow exits before build
-- GOOGLE_PLAY_SERVICE_ACCOUNT_JSON is NOT set
-- Upload job skipped (depends on successful build)
 
 ## Action Items for Escalion
 
@@ -73,7 +66,6 @@ First AAB upload MUST be manual:
 - AndroidManifest.xml, build.gradle (targetSdk 34, minSdk 21)
 - App signing managed by EAS
 - Push notifications via Expo (no google-services.json needed)
-- EAS CLI v19.1.0 installed on Orange Pi (for local use if needed)
 
 ## Worker Limitations (Cannot Build Here)
 
