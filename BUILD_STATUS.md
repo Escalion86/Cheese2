@@ -39,13 +39,15 @@ and credentials that must be configured manually.
 - Splash screen: `assets/images/splash.png` ✅
 - Notification icon: `assets/images/notification-icon.png` ✅
 - Feature graphic: 1024x500 PNG — `assets/images/feature-graphic.png` ✅ (created 2026-05-25)
-- Screenshots: ❌ NOT CREATED (need device screenshots after first build)
+- Screenshots: ⚠️ PLACEHOLDERS created (programmatic, need real device screenshots after first build)
 
 ### Documentation
 - `BUILD_GUIDE.md` — full build guide
 - `RELEASE_NOTES.md` — v1.1.0 release notes with M1-T8 features
 - `PRIVACY_POLICY.md` — privacy policy (required by Play Store)
 - `GITHUB_SECRETS.md` — secrets setup guide
+- `store-listing/PLAY_STORE_LISTING.md` — complete Play Store listing template (copy-paste ready)
+- `store-listing/screenshots/` — 5 placeholder screenshots (replace with real device shots)
 
 ## Blockers (require manual action)
 
