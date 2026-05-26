@@ -1,9 +1,9 @@
 # Android Internal Testing Build — FINAL Blocker Report
 
-**Date:** 2026-05-26 09:00
+**Date:** 2026-05-26
 **Task:** t_12199359
 **Status:** BLOCKED — requires manual actions by Escalion
-**Attempts:** 44+ (all failed at same point)
+**Attempts:** 45+ (all blocked on same credentials)
 
 ## Verdict
 
